@@ -89,6 +89,6 @@ def test_role_based_access(api_client, create_user):
 
     # Field agent shouldn't access fhir export (physician/admin only)
     api_client.force_authenticate(user=field_agent)
-    url = reverse("fhir_export:report_export", kwargs={"report_id": 1})
+    url = reverse("fhir_export:export", kwargs={"report_id": 1})
     resp = api_client.get(url)
     assert resp.status_code == status.HTTP_403_FORBIDDEN
