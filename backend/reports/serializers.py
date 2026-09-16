@@ -18,8 +18,11 @@ class ReportSerializer(serializers.ModelSerializer):
     """
     result = ProcessingResultSerializer(read_only=True)
     signed_by_user = PhysicianSerializer(source="signed_by", read_only=True)
-    pseudo_id = serializers.UUIDField(source="result.record.patient.pseudo_id", read_only=True)
-    job_id = serializers.IntegerField(source="result.record.id", read_only=True)
+    pseudo_id = serializers.UUIDField(
+        source="result.record.patient.pseudo_id",
+        read_only=True)
+    job_id = serializers.IntegerField(
+        source="result.record.id", read_only=True)
 
     class Meta:
         model = Report
@@ -44,7 +47,8 @@ class ReportUpdateSerializer(serializers.ModelSerializer):
         fields = ["physician_notes"]
 
     def update(self, instance, validated_data):
-        instance.physician_notes = validated_data.get("physician_notes", instance.physician_notes)
+        instance.physician_notes = validated_data.get(
+            "physician_notes", instance.physician_notes)
         if instance.status == Report.Status.PENDING_REVIEW:
             instance.status = Report.Status.REVIEWED
         instance.save()

@@ -25,8 +25,8 @@ import numpy as np
 logger = logging.getLogger("ecg.pipeline")
 
 # Lead indices in standard 12-lead order (AHA/ACC 2009)
-LEAD_II_INDEX  = 1
-LEAD_V5_INDEX  = 10
+LEAD_II_INDEX = 1
+LEAD_V5_INDEX = 10
 
 # Minimum fraction of beats that must be fully delineated (all 5 landmarks)
 MIN_DELINEATION_RATE = 0.50
@@ -62,28 +62,35 @@ def delineate(signals_clean: np.ndarray, fs: int) -> dict:
 
     # Fallback: Lead V5
     if n_leads > LEAD_V5_INDEX:
-        logger.warning("Lead II delineation insufficient — falling back to Lead V5.")
+        logger.warning(
+            "Lead II delineation insufficient — falling back to Lead V5.")
         result = _try_delineate(signals_clean[LEAD_V5_INDEX], fs, "V5")
         if result is not None:
             return result
 
     # Partial mode: R-peaks only
-    logger.warning("Full delineation failed on both leads — using R-peaks only (Pan-Tompkins).")
+    logger.warning(
+        "Full delineation failed on both leads — using R-peaks only (Pan-Tompkins).")
     return _rpeaks_only(signals_clean[min(LEAD_II_INDEX, n_leads - 1)], fs)
 
 
-def _try_delineate(lead_signal: np.ndarray, fs: int, lead_name: str) -> dict | None:
+def _try_delineate(
+        lead_signal: np.ndarray,
+        fs: int,
+        lead_name: str) -> dict | None:
     """
     Attempt full P/QRS/T delineation on a single lead.
     Returns None if delineation rate is below MIN_DELINEATION_RATE.
     """
     import neurokit2 as nk
-    import pandas as pd
 
     try:
         ecg_df, _ = nk.ecg_process(lead_signal, sampling_rate=fs)
     except Exception as exc:
-        logger.warning("NeuroKit2 ecg_process failed on Lead %s: %s", lead_name, exc)
+        logger.warning(
+            "NeuroKit2 ecg_process failed on Lead %s: %s",
+            lead_name,
+            exc)
         return None
 
     def _extract(col):
@@ -93,10 +100,10 @@ def _try_delineate(lead_signal: np.ndarray, fs: int, lead_name: str) -> dict | N
         mask = ecg_df[col].notna() & (ecg_df[col] > 0)
         return ecg_df.index[mask].to_numpy(dtype=int)
 
-    r_peaks   = _extract("ECG_R_Peaks")
-    p_onsets  = _extract("ECG_P_Onsets")
-    q_peaks   = _extract("ECG_Q_Peaks")
-    s_peaks   = _extract("ECG_S_Peaks")
+    r_peaks = _extract("ECG_R_Peaks")
+    p_onsets = _extract("ECG_P_Onsets")
+    q_peaks = _extract("ECG_Q_Peaks")
+    s_peaks = _extract("ECG_S_Peaks")
     t_offsets = _extract("ECG_T_Offsets")
 
     n_beats = len(r_peaks)
@@ -117,14 +124,14 @@ def _try_delineate(lead_signal: np.ndarray, fs: int, lead_name: str) -> dict | N
         return None
 
     return {
-        "p_onsets":         p_onsets,
-        "q_peaks":          q_peaks,
-        "r_peaks":          r_peaks,
-        "s_peaks":          s_peaks,
-        "t_offsets":        t_offsets,
-        "n_beats":          n_beats,
-        "partial":          False,
-        "lead_used":        lead_name,
+        "p_onsets": p_onsets,
+        "q_peaks": q_peaks,
+        "r_peaks": r_peaks,
+        "s_peaks": s_peaks,
+        "t_offsets": t_offsets,
+        "n_beats": n_beats,
+        "partial": False,
+        "lead_used": lead_name,
         "delineation_rate": round(rate, 4),
     }
 
@@ -134,7 +141,8 @@ def _rpeaks_only(lead_signal: np.ndarray, fs: int) -> dict:
     import neurokit2 as nk
 
     try:
-        _, info = nk.ecg_peaks(lead_signal, sampling_rate=fs, method="pantompkins1985")
+        _, info = nk.ecg_peaks(
+            lead_signal, sampling_rate=fs, method="pantompkins1985")
         r_peaks = info["ECG_R_Peaks"]
     except Exception as exc:
         logger.error("Pan-Tompkins R-peak detection also failed: %s", exc)
@@ -144,13 +152,13 @@ def _rpeaks_only(lead_signal: np.ndarray, fs: int) -> dict:
     logger.info("Partial mode: %d R-peaks detected.", n_beats)
 
     return {
-        "p_onsets":         np.array([], dtype=int),
-        "q_peaks":          np.array([], dtype=int),
-        "r_peaks":          r_peaks,
-        "s_peaks":          np.array([], dtype=int),
-        "t_offsets":        np.array([], dtype=int),
-        "n_beats":          n_beats,
-        "partial":          True,
-        "lead_used":        "R-only",
+        "p_onsets": np.array([], dtype=int),
+        "q_peaks": np.array([], dtype=int),
+        "r_peaks": r_peaks,
+        "s_peaks": np.array([], dtype=int),
+        "t_offsets": np.array([], dtype=int),
+        "n_beats": n_beats,
+        "partial": True,
+        "lead_used": "R-only",
         "delineation_rate": 0.0,
     }

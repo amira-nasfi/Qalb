@@ -12,7 +12,11 @@ def api_client():
 
 @pytest.fixture
 def create_user(db):
-    def make_user(username, password, role=Role.FIELD_AGENT, is_suspended=False):
+    def make_user(
+            username,
+            password,
+            role=Role.FIELD_AGENT,
+            is_suspended=False):
         user = User.objects.create(
             username=username,
             email=f"{username}@example.com",
@@ -30,7 +34,8 @@ def test_login_success(api_client, create_user):
     create_user("field1", "securepassword123", Role.FIELD_AGENT)
 
     url = reverse("accounts:login")
-    response = api_client.post(url, {"username": "field1", "password": "securepassword123"})
+    response = api_client.post(
+        url, {"username": "field1", "password": "securepassword123"})
 
     assert response.status_code == status.HTTP_200_OK
     assert "access" in response.data
@@ -43,17 +48,23 @@ def test_login_invalid_credentials(api_client, create_user):
     create_user("field1", "securepassword123", Role.FIELD_AGENT)
 
     url = reverse("accounts:login")
-    response = api_client.post(url, {"username": "field1", "password": "wrongpassword"})
+    response = api_client.post(
+        url, {"username": "field1", "password": "wrongpassword"})
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.django_db
 def test_login_suspended_user(api_client, create_user):
-    create_user("field1", "securepassword123", Role.FIELD_AGENT, is_suspended=True)
+    create_user(
+        "field1",
+        "securepassword123",
+        Role.FIELD_AGENT,
+        is_suspended=True)
 
     url = reverse("accounts:login")
-    response = api_client.post(url, {"username": "field1", "password": "securepassword123"})
+    response = api_client.post(
+        url, {"username": "field1", "password": "securepassword123"})
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert "suspended" in str(response.data)

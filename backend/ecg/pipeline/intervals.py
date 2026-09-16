@@ -42,16 +42,16 @@ class Measurement:
 @dataclass
 class IntervalResult:
     """All computed intervals for one ECG record."""
-    hr_bpm:             Measurement
-    pr_ms:              Measurement | None    # None in partial mode
-    qrs_ms:             Measurement | None
-    qt_ms:              Measurement | None
-    qtc_bazett:         Measurement | None
-    qtc_fridericia:     Measurement | None
-    n_beats:            int
-    partial:            bool
-    lead_used:          str
-    delineation_rate:   float
+    hr_bpm: Measurement
+    pr_ms: Measurement | None    # None in partial mode
+    qrs_ms: Measurement | None
+    qt_ms: Measurement | None
+    qtc_bazett: Measurement | None
+    qtc_fridericia: Measurement | None
+    n_beats: int
+    partial: bool
+    lead_used: str
+    delineation_rate: float
 
     def to_dict(self) -> dict:
         """Serialisable dict for JSON storage."""
@@ -66,15 +66,15 @@ class IntervalResult:
                 "n_valid": m.n_valid,
             }
         return {
-            "hr_bpm":          _m(self.hr_bpm),
-            "pr_ms":           _m(self.pr_ms),
-            "qrs_ms":          _m(self.qrs_ms),
-            "qt_ms":           _m(self.qt_ms),
-            "qtc_bazett":      _m(self.qtc_bazett),
-            "qtc_fridericia":  _m(self.qtc_fridericia),
-            "n_beats":         self.n_beats,
-            "partial":         self.partial,
-            "lead_used":       self.lead_used,
+            "hr_bpm": _m(self.hr_bpm),
+            "pr_ms": _m(self.pr_ms),
+            "qrs_ms": _m(self.qrs_ms),
+            "qt_ms": _m(self.qt_ms),
+            "qtc_bazett": _m(self.qtc_bazett),
+            "qtc_fridericia": _m(self.qtc_fridericia),
+            "n_beats": self.n_beats,
+            "partial": self.partial,
+            "lead_used": self.lead_used,
             "delineation_rate": self.delineation_rate,
         }
 
@@ -90,15 +90,15 @@ def compute_intervals(delineation: dict, fs: int) -> IntervalResult:
     Returns:
         IntervalResult dataclass
     """
-    r_peaks   = delineation["r_peaks"]
-    p_onsets  = delineation["p_onsets"]
-    q_peaks   = delineation["q_peaks"]
-    s_peaks   = delineation["s_peaks"]
+    r_peaks = delineation["r_peaks"]
+    p_onsets = delineation["p_onsets"]
+    q_peaks = delineation["q_peaks"]
+    s_peaks = delineation["s_peaks"]
     t_offsets = delineation["t_offsets"]
-    partial   = delineation["partial"]
-    n_beats   = delineation["n_beats"]
+    partial = delineation["partial"]
+    n_beats = delineation["n_beats"]
 
-    # ── Heart Rate ────────────────────────────────────────────────────────────
+    # ── Heart Rate ──────────────────────────────────────────────────────────
     hr = _compute_hr(r_peaks, fs)
 
     if partial or n_beats < 2:
@@ -117,7 +117,7 @@ def compute_intervals(delineation: dict, fs: int) -> IntervalResult:
         )
 
     # RR intervals in seconds (for QTc formulas)
-    rr_ms  = np.diff(r_peaks) / fs * 1000.0   # ms
+    rr_ms = np.diff(r_peaks) / fs * 1000.0   # ms
     rr_sec = rr_ms / 1000.0
 
     # ── PR interval ──────────────────────────────────────────────────────────
@@ -159,7 +159,7 @@ def compute_intervals(delineation: dict, fs: int) -> IntervalResult:
     return result
 
 
-# ── Private helpers ───────────────────────────────────────────────────────────
+# ── Private helpers ─────────────────────────────────────────────────────
 
 def _compute_hr(r_peaks: np.ndarray, fs: int) -> Measurement:
     if len(r_peaks) < 2:
@@ -225,7 +225,9 @@ def _compute_qtc_bazett(
         return None
     qtc = qt_measurement.median / np.sqrt(median_rr)
     return Measurement(
-        median=round(qtc, 2),
+        median=round(
+            qtc,
+            2),
         iqr=qt_measurement.iqr,
         unit="ms",
         formula_ref="Bazett (1920): QTc = QT / sqrt(RR_sec). Heart, 7:353–370.",
@@ -245,7 +247,9 @@ def _compute_qtc_fridericia(
         return None
     qtc = qt_measurement.median / (median_rr ** (1.0 / 3.0))
     return Measurement(
-        median=round(qtc, 2),
+        median=round(
+            qtc,
+            2),
         iqr=qt_measurement.iqr,
         unit="ms",
         formula_ref="Fridericia (1920): QTc = QT / RR^(1/3). Acta Med. Scand., 53:469–486.",

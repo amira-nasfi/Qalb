@@ -7,8 +7,11 @@ from .serializers import AuditLogSerializer
 
 class IsAdminUser(permissions.BasePermission):
     """Only superusers or staff can view the audit log."""
+
     def has_permission(self, request, view):
-        return bool(request.user and (request.user.is_staff or request.user.is_superuser))
+        return bool(
+            request.user and (
+                request.user.is_staff or request.user.is_superuser))
 
 
 class AuditLogListView(generics.ListAPIView):

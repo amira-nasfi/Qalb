@@ -3,7 +3,7 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = False
 
-# ── HTTPS enforcement ─────────────────────────────────────────────────────────
+# ── HTTPS enforcement ───────────────────────────────────────────────────
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31_536_000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -13,7 +13,7 @@ CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+# ── Logging ─────────────────────────────────────────────────────────────
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

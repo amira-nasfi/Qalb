@@ -37,7 +37,7 @@ def process_ecg_task(self, record_id: int) -> dict:
         logger.error("process_ecg_task: ECGRecord %d not found.", record_id)
         return {"error": "record not found"}
 
-    # ── Mark as PROCESSING ────────────────────────────────────────────────────
+    # ── Mark as PROCESSING ──────────────────────────────────────────────────
     record.status = ECGRecord.Status.PROCESSING
     record.save(update_fields=["status", "updated_at"])
 
@@ -49,28 +49,28 @@ def process_ecg_task(self, record_id: int) -> dict:
     )
 
     try:
-        # ── 1. Load ───────────────────────────────────────────────────────────
+        # ── 1. Load ──────────────────────────────────────────────────────────
         signals, fs, metadata = load_ecg(record.file.path, record.fmt)
 
         record.fs = fs
         record.lead_count = signals.shape[0]
         record.save(update_fields=["fs", "lead_count", "updated_at"])
 
-        # ── 2. Preprocess ─────────────────────────────────────────────────────
+        # ── 2. Preprocess ────────────────────────────────────────────────────
         signals_clean = preprocess(signals, fs)
 
-        # ── 3. Delineate ──────────────────────────────────────────────────────
+        # ── 3. Delineate ─────────────────────────────────────────────────────
         delineation = delineate(signals_clean, fs)
 
-        # ── 4. Intervals ──────────────────────────────────────────────────────
+        # ── 4. Intervals ─────────────────────────────────────────────────────
         intervals = compute_intervals(delineation, fs)
 
-        # ── 5. Rule engine ────────────────────────────────────────────────────
+        # ── 5. Rule engine ───────────────────────────────────────────────────
         sex = record.patient.sex
         flags = apply_rules(intervals, sex)
         severity = severity_summary(flags)
 
-        # ── 6. Save ProcessingResult ──────────────────────────────────────────
+        # ── 6. Save ProcessingResult ─────────────────────────────────────────
         result = ProcessingResult.objects.create(
             record=record,
             intervals_json=intervals.to_dict(),
@@ -80,7 +80,7 @@ def process_ecg_task(self, record_id: int) -> dict:
             partial=delineation["partial"],
         )
 
-        # ── 7. Create draft Report ────────────────────────────────────────────
+        # ── 7. Create draft Report ───────────────────────────────────────────
         draft_text = generate_draft(flags)
         Report.objects.create(
             result=result,
@@ -89,7 +89,7 @@ def process_ecg_task(self, record_id: int) -> dict:
             status=Report.Status.PENDING_REVIEW,
         )
 
-        # ── 8. Mark as DONE ───────────────────────────────────────────────────
+        # ── 8. Mark as DONE ──────────────────────────────────────────────────
         record.status = ECGRecord.Status.DONE
         record.save(update_fields=["status", "updated_at"])
 
@@ -113,7 +113,10 @@ def process_ecg_task(self, record_id: int) -> dict:
             "ECG %d processed in %d ms — severity=%s, flags=%d.",
             record_id, elapsed_ms, severity, len(flags),
         )
-        return {"severity": severity, "flag_count": len(flags), "elapsed_ms": elapsed_ms}
+        return {
+            "severity": severity,
+            "flag_count": len(flags),
+            "elapsed_ms": elapsed_ms}
 
     except Exception as exc:
         record.status = ECGRecord.Status.ERROR

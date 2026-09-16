@@ -86,10 +86,15 @@ class AuditMiddleware:
             actor = getattr(request, "user", None)
 
             AuditLog.log(
-                action=action_map.get(action, action),
+                action=action_map.get(
+                    action,
+                    action),
                 target_type=self._infer_target_type(path),
                 target_id=self._infer_target_id(path),
-                actor=actor if (actor and hasattr(actor, "is_authenticated") and actor.is_authenticated) else None,
+                actor=actor if (
+                    actor and hasattr(
+                        actor,
+                        "is_authenticated") and actor.is_authenticated) else None,
                 request=request,
                 extra={
                     "http_method": method,
@@ -119,5 +124,15 @@ class AuditMiddleware:
         Extract the resource ID from the URL path.
         e.g. /api/reports/42/sign/ → "42"
         """
-        parts = [p for p in path.split("/") if p and p not in ("api", "reports", "ecg", "patients", "fhir", "sign", "status", "signal", "fhir")]
+        parts = [
+            p for p in path.split("/") if p and p not in (
+                "api",
+                "reports",
+                "ecg",
+                "patients",
+                "fhir",
+                "sign",
+                "status",
+                "signal",
+                "fhir")]
         return parts[-1] if parts else "list"

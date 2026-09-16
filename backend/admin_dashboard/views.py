@@ -21,13 +21,17 @@ class KPIDashboardView(APIView):
         today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
         # Total ECGs uploaded today
-        uploads_today = ECGRecord.objects.filter(uploaded_at__gte=today).count()
+        uploads_today = ECGRecord.objects.filter(
+            uploaded_at__gte=today).count()
 
         # Pending physician reviews
-        pending_reviews = Report.objects.filter(status=Report.Status.PENDING_REVIEW).count()
+        pending_reviews = Report.objects.filter(
+            status=Report.Status.PENDING_REVIEW).count()
 
         # Signed reports today
-        signed_today = Report.objects.filter(status=Report.Status.SIGNED, signed_at__gte=today).count()
+        signed_today = Report.objects.filter(
+            status=Report.Status.SIGNED,
+            signed_at__gte=today).count()
 
         # Active CRITICAL flags (in pending reports)
         critical_flags = Report.objects.filter(

@@ -11,8 +11,8 @@ from django.db import models
 
 class Role(models.TextChoices):
     FIELD_AGENT = "FIELD_AGENT", "Field Agent"
-    PHYSICIAN   = "PHYSICIAN",   "Physician"
-    ADMIN       = "ADMIN",       "Administrator"
+    PHYSICIAN = "PHYSICIAN", "Physician"
+    ADMIN = "ADMIN", "Administrator"
 
 
 class User(AbstractUser):
@@ -38,7 +38,7 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.get_full_name()} ({self.role})"
 
-    # ── Role helpers ───────────────────────────────────────────────────────────
+    # ── Role helpers ────────────────────────────────────────────────────────
     @property
     def is_physician(self):
         return self.role == Role.PHYSICIAN

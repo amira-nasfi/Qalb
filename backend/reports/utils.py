@@ -2,6 +2,7 @@
 Utility functions for reports.
 """
 
+
 def generate_draft(flags: list) -> str:
     """
     Generate a human-readable draft clinical summary based on the raised flags.
@@ -18,7 +19,8 @@ def generate_draft(flags: list) -> str:
 
     criticals = [f for f in flags if f.get("severity") == "CRITICAL"]
     warnings = [f for f in flags if f.get("severity") == "WARNING"]
-    infos = [f for f in flags if f.get("severity") == "INFO" and f.get("code") != "NORMAL_SINUS"]
+    infos = [f for f in flags if f.get(
+        "severity") == "INFO" and f.get("code") != "NORMAL_SINUS"]
 
     if criticals:
         lines.append("\n** CRITICAL FINDINGS **")

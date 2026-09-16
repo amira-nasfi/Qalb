@@ -3,7 +3,6 @@ ECG app models — file storage, processing results, and status tracking.
 """
 
 import hashlib
-import os
 from django.db import models
 from django.conf import settings
 from patients.models import Patient
@@ -13,15 +12,15 @@ class ECGRecord(models.Model):
     """One uploaded ECG file from the field team."""
 
     class Status(models.TextChoices):
-        PENDING    = "PENDING",    "Awaiting processing"
+        PENDING = "PENDING", "Awaiting processing"
         PROCESSING = "PROCESSING", "Pipeline running"
-        DONE       = "DONE",       "Processing complete"
-        ERROR      = "ERROR",      "Processing failed"
+        DONE = "DONE", "Processing complete"
+        ERROR = "ERROR", "Processing failed"
 
     class Format(models.TextChoices):
         WFDB = "wfdb", "WFDB (.mat + .hea)"
-        CSV  = "csv",  "CSV"
-        EDF  = "edf",  "EDF/EDF+"
+        CSV = "csv", "CSV"
+        EDF = "edf", "EDF/EDF+"
 
     patient = models.ForeignKey(
         Patient,
@@ -48,7 +47,10 @@ class ECGRecord(models.Model):
         db_index=True,
     )
     error_message = models.TextField(blank=True)
-    fs = models.IntegerField(null=True, blank=True, help_text="Sampling frequency in Hz")
+    fs = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Sampling frequency in Hz")
     lead_count = models.IntegerField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -87,8 +89,7 @@ class ProcessingResult(models.Model):
         help_text="Serialised IntervalResult from ecg.pipeline.intervals.",
     )
     flags_json = models.JSONField(
-        help_text="List of Flag dicts from ecg.pipeline.rule_engine — each includes citation.",
-    )
+        help_text="List of Flag dicts from ecg.pipeline.rule_engine — each includes citation.", )
     severity = models.CharField(
         max_length=10,
         choices=[("ROUTINE", "Routine"), ("URGENT", "Urgent"), ("CRITICAL", "Critical")],

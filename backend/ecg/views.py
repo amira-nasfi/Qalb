@@ -25,7 +25,8 @@ class ECGUploadView(generics.CreateAPIView):
         # Validate patient exists
         pseudo_id = request.data.get("pseudo_id")
         if not Patient.objects.filter(pseudo_id=pseudo_id).exists():
-            return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Patient not found"},
+                            status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -34,7 +35,8 @@ class ECGUploadView(generics.CreateAPIView):
         # Enqueue Celery task
         process_ecg_task.delay(record.pk)
 
-        status_url = request.build_absolute_uri(f"/api/ecg/{record.pk}/status/")
+        status_url = request.build_absolute_uri(
+            f"/api/ecg/{record.pk}/status/")
         return Response({
             "job_id": record.pk,
             "status_url": status_url,
@@ -73,10 +75,14 @@ class ECGSignalView(APIView):
     def get(self, request, record_id):
         record = get_object_or_404(ECGRecord, pk=record_id)
         if record.status != "DONE":
-            return Response({"error": "Processing not complete"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Processing not complete"},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         lead_name = request.query_params.get("lead", "II")
-        downsample = int(request.query_params.get("downsample", settings.ECG_DOWNSAMPLE_POINTS))
+        downsample = int(
+            request.query_params.get(
+                "downsample",
+                settings.ECG_DOWNSAMPLE_POINTS))
 
         # Load the file to serve the signal (raw arrays not stored in DB)
         from .pipeline.loader import load_ecg
@@ -86,11 +92,13 @@ class ECGSignalView(APIView):
             signals, fs, metadata = load_ecg(record.file.path, record.fmt)
             signals_clean = preprocess(signals, fs)
         except Exception as exc:
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(exc)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         lead_names = metadata["lead_names"]
         if lead_name not in lead_names:
-            return Response({"error": f"Lead {lead_name} not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": f"Lead {lead_name} not found"},
+                            status=status.HTTP_404_NOT_FOUND)
 
         lead_idx = lead_names.index(lead_name)
         lead_signal = signals_clean[lead_idx]
@@ -118,10 +126,12 @@ class ECGSignalView(APIView):
         # Quick R-peak detection on signal for UI markers
         import neurokit2 as nk
         try:
-            _, info = nk.ecg_peaks(lead_signal, sampling_rate=fs, method="pantompkins1985")
+            _, info = nk.ecg_peaks(
+                lead_signal, sampling_rate=fs, method="pantompkins1985")
             r_peaks_original = info["ECG_R_Peaks"]
             # Map original indices to downsampled indices
-            r_peaks_ds = [np.argmin(np.abs(indices - r)) for r in r_peaks_original]
+            r_peaks_ds = [np.argmin(np.abs(indices - r))
+                          for r in r_peaks_original]
         except Exception:
             r_peaks_ds = []
 

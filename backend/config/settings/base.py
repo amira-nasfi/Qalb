@@ -14,7 +14,7 @@ env = environ.Env(DEBUG=(bool, False))
 # Read .env file if present
 environ.Env.read_env(BASE_DIR / ".env")
 
-# ── Security ──────────────────────────────────────────────────────────────────
+# ── Security ────────────────────────────────────────────────────────────
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
@@ -22,7 +22,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 # ── Field-level encryption key (AES-256 via Fernet) ──────────────────────────
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY")
 
-# ── Application definition ────────────────────────────────────────────────────
+# ── Application definition ──────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -80,12 +80,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# ── Database ──────────────────────────────────────────────────────────────────
+# ── Database ────────────────────────────────────────────────────────────
 DATABASES = {
     "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3")
 }
 
-# ── Password validation ───────────────────────────────────────────────────────
+# ── Password validation ─────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
@@ -96,13 +96,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# ── Internationalisation ──────────────────────────────────────────────────────
+# ── Internationalisation ────────────────────────────────────────────────
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ── Static & Media ────────────────────────────────────────────────────────────
+# ── Static & Media ──────────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
@@ -110,7 +110,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ── Django REST Framework ─────────────────────────────────────────────────────
+# ── Django REST Framework ───────────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -128,7 +128,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 25,
 }
 
-# ── Celery ────────────────────────────────────────────────────────────────────
+# ── Celery ──────────────────────────────────────────────────────────────
 CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -136,28 +136,28 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
+# ── CORS ────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=["http://localhost:5173", "http://127.0.0.1:5173"],
 )
 CORS_ALLOW_CREDENTIALS = True
 
-# ── File upload ───────────────────────────────────────────────────────────────
+# ── File upload ─────────────────────────────────────────────────────────
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52_428_800   # 50 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52_428_800   # 50 MB
 
-# ── ECG pipeline constants ────────────────────────────────────────────────────
+# ── ECG pipeline constants ──────────────────────────────────────────────
 ECG_UPLOAD_DIR = "ecg_uploads"
 ECG_MAX_FS = 1000       # Hz
 ECG_MIN_FS = 250        # Hz
 ECG_MAX_LEADS = 12
 ECG_DOWNSAMPLE_POINTS = 500  # for chart endpoint
 
-# ── Custom User Model ─────────────────────────────────────────────────────────
+# ── Custom User Model ───────────────────────────────────────────────────
 AUTH_USER_MODEL = "accounts.User"
 
-# -- JWT Authentication Settings -----------------------------------------------
+# -- JWT Authentication Settings -----------------------------------------
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=8),
@@ -166,8 +166,7 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# ── Security Hardening ────────────────────────────────────────────────────────
+# ── Security Hardening ──────────────────────────────────────────────────
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
-

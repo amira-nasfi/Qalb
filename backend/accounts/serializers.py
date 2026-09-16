@@ -9,20 +9,26 @@ from .models import User, Role
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True)
-    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+    password = serializers.CharField(
+        write_only=True, style={
+            "input_type": "password"})
 
     def validate(self, data):
         username = data.get("username")
         password = data.get("password")
         request = self.context.get("request")
 
-        user = authenticate(request=request, username=username, password=password)
+        user = authenticate(
+            request=request,
+            username=username,
+            password=password)
         if not user:
-            raise serializers.ValidationError("Invalid credentials.", code="authorization")
+            raise serializers.ValidationError(
+                "Invalid credentials.", code="authorization")
         if user.is_suspended:
             raise serializers.ValidationError(
-                "Your account has been suspended. Contact your administrator.", code="suspended"
-            )
+                "Your account has been suspended. Contact your administrator.",
+                code="suspended")
         data["user"] = user
         return data
 
@@ -49,8 +55,17 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "username", "email", "full_name", "first_name", "last_name",
-            "role", "organization", "is_suspended", "last_login", "date_joined",
+            "id",
+            "username",
+            "email",
+            "full_name",
+            "first_name",
+            "last_name",
+            "role",
+            "organization",
+            "is_suspended",
+            "last_login",
+            "date_joined",
         ]
         read_only_fields = ["last_login", "date_joined"]
 
@@ -109,5 +124,6 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, data):
         user = self.context["request"].user
         if not user.check_password(data["old_password"]):
-            raise serializers.ValidationError({"old_password": "Incorrect password."})
+            raise serializers.ValidationError(
+                {"old_password": "Incorrect password."})
         return data

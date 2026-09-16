@@ -19,10 +19,10 @@ from scipy.signal import butter, filtfilt
 
 logger = logging.getLogger("ecg.pipeline")
 
-# ── Filter constants ──────────────────────────────────────────────────────────
-BANDPASS_LOW_HZ   = 0.5
-BANDPASS_HIGH_HZ  = 40.0
-FILTER_ORDER      = 4
+# ── Filter constants ────────────────────────────────────────────────────
+BANDPASS_LOW_HZ = 0.5
+BANDPASS_HIGH_HZ = 40.0
+FILTER_ORDER = 4
 
 
 def preprocess(signals: np.ndarray, fs: int) -> np.ndarray:
@@ -48,7 +48,8 @@ def preprocess(signals: np.ndarray, fs: int) -> np.ndarray:
         try:
             lead_filtered = filtfilt(b, a, lead)
         except ValueError as exc:
-            logger.warning("Lead %d bandpass filter failed (%s) — using raw signal.", i, exc)
+            logger.warning(
+                "Lead %d bandpass filter failed (%s) — using raw signal.", i, exc)
             lead_filtered = lead
 
         # Step 2: per-lead z-score normalisation
@@ -60,18 +61,22 @@ def preprocess(signals: np.ndarray, fs: int) -> np.ndarray:
 
         signals_clean[i] = lead_norm.astype(np.float32)
 
-    logger.debug("Preprocessing done: %d leads, %d samples, fs=%d Hz.", n_leads, n_samples, fs)
+    logger.debug(
+        "Preprocessing done: %d leads, %d samples, fs=%d Hz.",
+        n_leads,
+        n_samples,
+        fs)
     return signals_clean
 
 
 def _butter_bandpass(fs: int):
     """Return (b, a) coefficients for a 4th-order Butterworth bandpass filter."""
     nyq = fs / 2.0
-    low  = BANDPASS_LOW_HZ  / nyq
+    low = BANDPASS_LOW_HZ / nyq
     high = BANDPASS_HIGH_HZ / nyq
 
     # Clamp to valid range
-    low  = max(low,  1e-4)
+    low = max(low, 1e-4)
     high = min(high, 0.9999)
 
     b, a = butter(FILTER_ORDER, [low, high], btype="band")

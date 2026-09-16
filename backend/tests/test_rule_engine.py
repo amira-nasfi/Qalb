@@ -3,7 +3,12 @@ from ecg.pipeline.rule_engine import apply_rules, severity_summary
 
 
 def _meas(val, unit="ms"):
-    return Measurement(median=val, iqr=0.0, unit=unit, formula_ref="", n_valid=10)
+    return Measurement(
+        median=val,
+        iqr=0.0,
+        unit=unit,
+        formula_ref="",
+        n_valid=10)
 
 
 def _intervals(hr=70, pr=150, qrs=90, qt=400, qtc=410, partial=False):
@@ -44,5 +49,6 @@ def test_severity_summary():
     ]
     assert severity_summary(flags) == "URGENT"
 
-    flags.append(apply_rules(_intervals(qtc=550), "M")[0])  # QTC_CRITICAL (CRITICAL)
+    flags.append(apply_rules(_intervals(qtc=550), "M")
+                 [0])  # QTC_CRITICAL (CRITICAL)
     assert severity_summary(flags) == "CRITICAL"

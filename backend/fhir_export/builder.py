@@ -18,9 +18,10 @@ def build_observation(report: Report) -> dict:
     intervals = report.result.intervals_json
 
     components = []
-    
+
     # HR
-    if intervals.get("hr_bpm") and intervals["hr_bpm"].get("median") is not None:
+    if intervals.get("hr_bpm") and intervals["hr_bpm"].get(
+            "median") is not None:
         components.append({
             "code": {"coding": [{"system": "http://loinc.org", "code": LOINC_HR}]},
             "valueQuantity": {
@@ -29,7 +30,7 @@ def build_observation(report: Report) -> dict:
                 "system": "http://unitsofmeasure.org"
             }
         })
-        
+
     # PR
     if intervals.get("pr_ms") and intervals["pr_ms"].get("median") is not None:
         components.append({
@@ -40,9 +41,10 @@ def build_observation(report: Report) -> dict:
                 "system": "http://unitsofmeasure.org"
             }
         })
-        
+
     # QRS
-    if intervals.get("qrs_ms") and intervals["qrs_ms"].get("median") is not None:
+    if intervals.get("qrs_ms") and intervals["qrs_ms"].get(
+            "median") is not None:
         components.append({
             "code": {"coding": [{"system": "http://loinc.org", "code": LOINC_QRS}]},
             "valueQuantity": {
@@ -53,7 +55,8 @@ def build_observation(report: Report) -> dict:
         })
 
     # QTc (Bazett)
-    if intervals.get("qtc_bazett") and intervals["qtc_bazett"].get("median") is not None:
+    if intervals.get("qtc_bazett") and intervals["qtc_bazett"].get(
+            "median") is not None:
         components.append({
             "code": {"coding": [{"system": "http://loinc.org", "code": LOINC_QTC}]},
             "valueQuantity": {
@@ -64,7 +67,7 @@ def build_observation(report: Report) -> dict:
         })
 
     pseudo_id = str(report.result.record.patient.pseudo_id)
-    
+
     return {
         "resourceType": "Observation",
         "id": f"obs-{report.id}",
@@ -97,7 +100,7 @@ def build_diagnostic_report(report: Report, obs_id: str) -> dict:
                 {"url": "citation", "valueString": f.get("citation")},
             ]
         })
-        
+
     pseudo_id = str(report.result.record.patient.pseudo_id)
 
     return {

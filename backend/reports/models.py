@@ -17,8 +17,8 @@ class Report(models.Model):
 
     class Status(models.TextChoices):
         PENDING_REVIEW = "PENDING_REVIEW", "Pending Physician Review"
-        REVIEWED       = "REVIEWED",       "Reviewed (Notes Added)"
-        SIGNED         = "SIGNED",         "Electronically Signed"
+        REVIEWED = "REVIEWED", "Reviewed (Notes Added)"
+        SIGNED = "SIGNED", "Electronically Signed"
 
     result = models.OneToOneField(
         ProcessingResult,

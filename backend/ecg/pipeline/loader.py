@@ -27,7 +27,19 @@ import numpy as np
 logger = logging.getLogger("ecg.pipeline")
 
 # Standard 12-lead order (AHA/ACC 2009)
-STANDARD_LEADS = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"]
+STANDARD_LEADS = [
+    "I",
+    "II",
+    "III",
+    "aVR",
+    "aVL",
+    "aVF",
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6"]
 
 MIN_FS = 250    # Hz — below this, delineation quality degrades unacceptably
 MAX_FS = 1000   # Hz
@@ -57,20 +69,24 @@ def load_ecg(path: str, fmt: str) -> tuple[np.ndarray, int, dict]:
     elif fmt == "edf":
         signals, fs, lead_names = _load_edf(path)
     else:
-        raise ValueError(f"Unsupported format: {fmt!r}. Use 'wfdb', 'csv', or 'edf'.")
+        raise ValueError(
+            f"Unsupported format: {fmt!r}. Use 'wfdb', 'csv', or 'edf'.")
 
     warnings = []
 
     # Validate sampling frequency
     if fs < MIN_FS:
-        warnings.append(f"fs={fs} Hz is below minimum {MIN_FS} Hz — delineation may be unreliable.")
+        warnings.append(
+            f"fs={fs} Hz is below minimum {MIN_FS} Hz — delineation may be unreliable.")
     if fs > MAX_FS:
-        warnings.append(f"fs={fs} Hz is above maximum {MAX_FS} Hz — signals will be downsampled.")
+        warnings.append(
+            f"fs={fs} Hz is above maximum {MAX_FS} Hz — signals will be downsampled.")
 
     # Validate lead count
     n_leads, n_samples = signals.shape
     if n_leads < 12:
-        warnings.append(f"Only {n_leads} leads found; expected 12. Some intervals may not be computed.")
+        warnings.append(
+            f"Only {n_leads} leads found; expected 12. Some intervals may not be computed.")
     if n_leads > 12:
         logger.debug("Truncating %d leads to 12.", n_leads)
         signals = signals[:12, :]

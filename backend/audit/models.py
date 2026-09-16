@@ -17,25 +17,25 @@ User = get_user_model()
 
 
 class AuditAction(models.TextChoices):
-    CREATE           = "CREATE",           "Record created"
-    UPDATE           = "UPDATE",           "Record updated"
-    SIGN             = "SIGN",             "Report signed by physician"
-    PROCESS_START    = "PROCESS_START",    "ECG processing started"
-    PROCESS_DONE     = "PROCESS_DONE",     "ECG processing completed"
-    PROCESS_ERROR    = "PROCESS_ERROR",    "ECG processing failed"
-    EXPORT_FHIR      = "EXPORT_FHIR",      "FHIR bundle exported"
-    # ── Auth & Account ────────────────────────────────────────────────────────
-    LOGIN            = "LOGIN",            "User logged in"
-    LOGIN_FAILED     = "LOGIN_FAILED",     "Login attempt failed"
-    LOGOUT           = "LOGOUT",           "User logged out"
+    CREATE = "CREATE", "Record created"
+    UPDATE = "UPDATE", "Record updated"
+    SIGN = "SIGN", "Report signed by physician"
+    PROCESS_START = "PROCESS_START", "ECG processing started"
+    PROCESS_DONE = "PROCESS_DONE", "ECG processing completed"
+    PROCESS_ERROR = "PROCESS_ERROR", "ECG processing failed"
+    EXPORT_FHIR = "EXPORT_FHIR", "FHIR bundle exported"
+    # ── Auth & Account ──────────────────────────────────────────────────────
+    LOGIN = "LOGIN", "User logged in"
+    LOGIN_FAILED = "LOGIN_FAILED", "Login attempt failed"
+    LOGOUT = "LOGOUT", "User logged out"
     PASSWORD_CHANGED = "PASSWORD_CHANGED", "Password changed"
-    INVITE           = "INVITE",           "User account invited/created"
-    SUSPEND          = "SUSPEND",          "User account suspended"
-    REINSTATE        = "REINSTATE",        "User account reinstated"
-    ROLE_CHANGED     = "ROLE_CHANGED",     "User role changed"
-    # ── Access control ────────────────────────────────────────────────────────
-    PERMISSION_DENY  = "PERMISSION_DENY",  "Access denied (403)"
-    VIEW             = "VIEW",             "Record viewed"
+    INVITE = "INVITE", "User account invited/created"
+    SUSPEND = "SUSPEND", "User account suspended"
+    REINSTATE = "REINSTATE", "User account reinstated"
+    ROLE_CHANGED = "ROLE_CHANGED", "User role changed"
+    # ── Access control ──────────────────────────────────────────────────────
+    PERMISSION_DENY = "PERMISSION_DENY", "Access denied (403)"
+    VIEW = "VIEW", "Record viewed"
 
 
 class AuditLog(models.Model):

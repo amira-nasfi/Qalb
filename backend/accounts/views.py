@@ -34,7 +34,7 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # ── Rate-limit check ───────────────────────────────────────────────────
+        # ── Rate-limit check ─────────────────────────────────────────────────
         limited = is_ratelimited(
             request,
             group="login",
@@ -49,7 +49,9 @@ class LoginView(APIView):
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        serializer = LoginSerializer(data=request.data, context={"request": request})
+        serializer = LoginSerializer(
+            data=request.data, context={
+                "request": request})
         if not serializer.is_valid():
             # Log failed attempt
             AuditLog.log(
@@ -60,7 +62,9 @@ class LoginView(APIView):
                 request=request,
                 extra={"reason": "invalid_credentials"},
             )
-            return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                serializer.errors,
+                status=status.HTTP_401_UNAUTHORIZED)
 
         user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
@@ -91,13 +95,15 @@ class LogoutView(APIView):
     def post(self, request):
         refresh_token = request.data.get("refresh")
         if not refresh_token:
-            return Response({"error": "Refresh token required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Refresh token required."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
         except (TokenError, InvalidToken):
-            return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid or expired token."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         AuditLog.log(
             action=AuditAction.LOGOUT,
@@ -107,7 +113,8 @@ class LogoutView(APIView):
             request=request,
         )
 
-        return Response({"detail": "Logged out successfully."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Logged out successfully."},
+                        status=status.HTTP_200_OK)
 
 
 class MeView(generics.RetrieveAPIView):
@@ -130,13 +137,15 @@ class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
         user = request.user
         user.set_password(serializer.validated_data["new_password"])
         user.save()
-        update_session_auth_hash(request, user)  # Keeps session valid after password change
+        # Keeps session valid after password change
+        update_session_auth_hash(request, user)
 
         AuditLog.log(
             action=AuditAction.PASSWORD_CHANGED,
@@ -149,7 +158,7 @@ class ChangePasswordView(APIView):
         return Response({"detail": "Password changed successfully."})
 
 
-# ── Admin: User Management ─────────────────────────────────────────────────────
+# ── Admin: User Management ──────────────────────────────────────────────
 
 class UserListView(generics.ListAPIView):
     """
@@ -191,7 +200,8 @@ class UserSuspendView(APIView):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         if user == request.user:
-            return Response({"error": "You cannot suspend yourself."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "You cannot suspend yourself."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         user.is_suspended = not user.is_suspended
         user.save(update_fields=["is_suspended"])

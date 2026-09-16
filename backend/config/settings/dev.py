@@ -4,10 +4,10 @@ from .base import *  # noqa: F401,F403
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
-# ── Email (console in dev) ────────────────────────────────────────────────────
+# ── Email (console in dev) ──────────────────────────────────────────────
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+# ── Logging ─────────────────────────────────────────────────────────────
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
