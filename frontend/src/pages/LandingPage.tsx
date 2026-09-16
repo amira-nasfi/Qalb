@@ -10,12 +10,7 @@ export const LandingPage: React.FC = () => {
     <div className="landing-page">
       <div className="hero-section">
         <div className="hero-content">
-          <div className="brand-header">
-            <HeartPulse size={48} className="text-mint" />
-            <h1 className="hero-title">
-              Qalb <span lang="ar" className="text-ar">قلب</span>
-            </h1>
-          </div>
+            <img src="/logo.png" alt="Qalb Logo" className="h-16 w-auto object-contain drop-shadow-md" />
           <h2 className="hero-subtitle">
             Clinical ECG Interpretation & Triage System
           </h2>

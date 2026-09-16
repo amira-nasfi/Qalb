@@ -25,8 +25,7 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <HeartPulse size={28} className="brand-icon" />
-        <span className="brand-name">Qalb <span lang="ar" className="text-sm font-normal opacity-80">قلب</span></span>
+        <img src="/logo.png" alt="Qalb Logo" className="h-10 w-auto object-contain drop-shadow-sm" />
       </div>
       
       <nav className="sidebar-nav">

@@ -42,10 +42,7 @@ export const LoginPage: React.FC = () => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-brand text-center">
-          <HeartPulse size={48} className="text-mint mx-auto mb-4" />
-          <h1 className="login-title">
-            Qalb <span lang="ar" className="text-ar">قلب</span>
-          </h1>
+          <img src="/logo.png" alt="Qalb Logo" className="h-20 w-auto object-contain drop-shadow-md mx-auto mb-2" />
           <p className="login-subtitle">Plateforme Médicale</p>
         </div>
 
