@@ -1,4 +1,3 @@
-import os
 from django.conf import settings
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -10,8 +9,8 @@ from patients.models import Patient
 from .models import ECGRecord, ProcessingResult
 from .serializers import ECGUploadSerializer, ECGStatusSerializer, ProcessingResultSerializer
 from .tasks import process_ecg_task
-
 from accounts.permissions import IsFieldAgentOrPhysician
+
 
 class ECGUploadView(generics.CreateAPIView):
     """
@@ -79,7 +78,7 @@ class ECGSignalView(APIView):
         lead_name = request.query_params.get("lead", "II")
         downsample = int(request.query_params.get("downsample", settings.ECG_DOWNSAMPLE_POINTS))
 
-        # We must load the file again to serve the signal, because we don't store raw arrays in DB
+        # Load the file to serve the signal (raw arrays not stored in DB)
         from .pipeline.loader import load_ecg
         from .pipeline.preprocessing import preprocess
 
@@ -112,21 +111,19 @@ class ECGSignalView(APIView):
         try:
             result = record.result
             if "r_peaks" in result.intervals_json:
-                pass # Ideally we would return mapped R-peaks here. For simplicity in MVP, we might omit or recalculate.
-                # Actually, NeuroKit2 delineator returns them, but we didn't store raw arrays in DB.
-                # Since the chart needs them, let's just return the signal. The frontend can use a simplified approach or we run Pan-Tompkins here quickly.
+                pass  # R-peaks not stored as raw arrays; frontend uses simplified approach
         except ProcessingResult.DoesNotExist:
             pass
 
-        # Let's run a quick R-peak detection on the downsampled signal for the UI markers
+        # Quick R-peak detection on signal for UI markers
         import neurokit2 as nk
         try:
-             _, info = nk.ecg_peaks(lead_signal, sampling_rate=fs, method="pantompkins1985")
-             r_peaks_original = info["ECG_R_Peaks"]
-             # Map original indices to downsampled indices
-             r_peaks_ds = [np.argmin(np.abs(indices - r)) for r in r_peaks_original]
-        except:
-             r_peaks_ds = []
+            _, info = nk.ecg_peaks(lead_signal, sampling_rate=fs, method="pantompkins1985")
+            r_peaks_original = info["ECG_R_Peaks"]
+            # Map original indices to downsampled indices
+            r_peaks_ds = [np.argmin(np.abs(indices - r)) for r in r_peaks_original]
+        except Exception:
+            r_peaks_ds = []
 
         return Response({
             "samples": lead_signal_ds.tolist(),

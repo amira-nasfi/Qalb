@@ -1,5 +1,4 @@
 from django.utils import timezone
-from django.db.models import Count, Avg, F, Q
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -42,10 +41,14 @@ class KPIDashboardView(APIView):
             action=AuditAction.PROCESS_DONE,
             timestamp__gte=timezone.now() - timedelta(hours=24)
         ).order_by("-timestamp")[:100]
-        
+
         avg_time = 0
         if recent_done_logs:
-            times = [log.extra.get("elapsed_ms", 0) for log in recent_done_logs if log.extra and "elapsed_ms" in log.extra]
+            times = [
+                log.extra.get("elapsed_ms", 0)
+                for log in recent_done_logs
+                if log.extra and "elapsed_ms" in log.extra
+            ]
             if times:
                 avg_time = sum(times) / len(times)
 

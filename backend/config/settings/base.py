@@ -4,6 +4,7 @@ Shared across all environments.
 """
 
 import environ
+from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -156,8 +157,7 @@ ECG_DOWNSAMPLE_POINTS = 500  # for chart endpoint
 # ── Custom User Model ─────────────────────────────────────────────────────────
 AUTH_USER_MODEL = "accounts.User"
 
-# ── JWT Authentication Settings ───────────────────────────────────────────────
-from datetime import timedelta
+# -- JWT Authentication Settings -----------------------------------------------
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=8),

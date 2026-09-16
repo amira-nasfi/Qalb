@@ -74,7 +74,7 @@ export const UserManagementPage: React.FC = () => {
                     <div className="text-xs text-tertiary">{user.email}</div>
                   </td>
                   <td className="p-4">
-                    <Badge variant={user.role === 'ADMIN' ? 'critical' : user.role === 'PHYSICIAN' ? 'default' : 'secondary'}>
+                    <Badge severity={user.role === 'ADMIN' ? 'CRITICAL' : user.role === 'PHYSICIAN' ? 'INFO' : 'SUCCESS'}>
                       {user.role}
                     </Badge>
                   </td>

@@ -2,7 +2,6 @@
 accounts/views.py
 All authentication and user management endpoints for Qalb قلب.
 """
-from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
@@ -11,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from ratelimit.decorators import ratelimit
 from ratelimit.utils import is_ratelimited
 
 from audit.models import AuditLog, AuditAction

@@ -11,7 +11,7 @@ from .serializers import ReportSerializer, ReportUpdateSerializer
 from audit.models import AuditLog, AuditAction
 
 
-from accounts.permissions import IsPhysician, IsPhysicianOrAdmin, IsFieldAgent
+from accounts.permissions import IsPhysician
 
 
 class ReportListView(generics.ListAPIView):
@@ -30,7 +30,7 @@ class ReportListView(generics.ListAPIView):
         qs = Report.objects.select_related("result__record__patient", "signed_by").all()
         user = self.request.user
         if getattr(user, 'is_field_agent', False):
-            # Field agents only see signed reports (for MVP, we assume all signed, or filter by upload user if we add that later)
+            # Field agents only see signed reports
             qs = qs.filter(status=Report.Status.SIGNED)
         return qs
 
