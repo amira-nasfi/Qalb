@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from ratelimit.utils import is_ratelimited
+from django_ratelimit.core import is_ratelimited
 
 from audit.models import AuditLog, AuditAction
 from .models import User
