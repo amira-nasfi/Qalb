@@ -1,0 +1,51 @@
+.admin-page {
+  padding: var(--spacing-8) var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-header {
+  margin-bottom: var(--spacing-8);
+}
+
+.audit-table th {
+  background-color: var(--navy-dark) !important;
+  color: var(--bg-white) !important;
+  border-bottom: none !important;
+}
+
+.action-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: var(--bg-mint-soft);
+  color: var(--navy-dark);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.payload-box {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-subtle);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

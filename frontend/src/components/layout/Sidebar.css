@@ -1,0 +1,127 @@
+.sidebar {
+  width: 260px;
+  background-color: var(--navy-dark);
+  color: var(--bg-white);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  border-right: 1px solid var(--navy-base);
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: var(--spacing-6);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  border-bottom: 1px solid var(--navy-base);
+}
+
+.brand-icon {
+  color: var(--mint-primary);
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--spacing-4) var(--spacing-3);
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: var(--spacing-6);
+}
+
+.nav-section-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-2);
+  padding-left: var(--spacing-3);
+  font-weight: 600;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  transition: var(--transition-fast);
+  font-weight: 500;
+  margin-bottom: 2px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.nav-item:hover {
+  background-color: var(--navy-base);
+  color: var(--bg-white);
+}
+
+.nav-item.active {
+  background-color: var(--navy-base);
+  color: var(--mint-primary);
+  font-weight: 600;
+}
+
+.nav-item.active svg {
+  color: var(--mint-primary);
+}
+
+.sidebar-footer {
+  padding: var(--spacing-4) var(--spacing-3);
+  border-top: 1px solid var(--navy-base);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  background-color: var(--navy-base);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--teal-secondary);
+  color: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bg-white);
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}

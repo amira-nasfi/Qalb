@@ -1,0 +1,78 @@
+name: Provenance Guard
+
+on:
+  push:
+    branches: [main, develop, amira_dev]
+  pull_request:
+    branches: [main, amira_dev]
+
+# This workflow enforces the hard constraint from the hackathon brief:
+# - Ensures DATASET_PROVENANCE.md is always present and non-empty
+# - Ensures no trained model binary/pickle files are committed
+# - Ensures no proprietary clinical dataset files are committed
+
+jobs:
+  provenance-check:
+    name: Dataset Provenance & Model Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify DATASET_PROVENANCE.md exists and is non-empty
+        run: |
+          echo "Checking DATASET_PROVENANCE.md..."
+          if [ ! -f "backend/provenance/DATASET_PROVENANCE.md" ]; then
+            echo "❌ FAIL: DATASET_PROVENANCE.md is MISSING."
+            echo "This file is mandatory per the hackathon brief (Défi 2.2)."
+            exit 1
+          fi
+          LINES=$(wc -l < "backend/provenance/DATASET_PROVENANCE.md")
+          if [ "$LINES" -lt 5 ]; then
+            echo "❌ FAIL: DATASET_PROVENANCE.md appears empty or insufficient (< 5 lines)."
+            exit 1
+          fi
+          echo "✅ PASS: DATASET_PROVENANCE.md found with $LINES lines."
+
+      - name: Check for committed trained model files
+        run: |
+          echo "Scanning for prohibited ML model artifacts..."
+          # Patterns: .pkl, .joblib, .h5, .onnx, .pt, .pth, .pb (TF SavedModel)
+          FOUND=$(git ls-files | grep -E '\.(pkl|joblib|h5|onnx|pt|pth|pb|safetensors)$' || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ FAIL: The following trained model files were found in the repository:"
+            echo "$FOUND"
+            echo ""
+            echo "Qalb uses ONLY deterministic, explainable signal processing algorithms."
+            echo "Trained model artifacts must NOT be committed."
+            exit 1
+          fi
+          echo "✅ PASS: No prohibited trained model artifacts found."
+
+      - name: Check for prohibited raw clinical dataset files
+        run: |
+          echo "Scanning for raw clinical dataset files..."
+          # Patients data files that should NEVER be in a repo
+          FOUND=$(git ls-files | grep -E '\.(dat|hea|atr|mat|edf|xli)$' || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ FAIL: Potential raw clinical signal files found in repo:"
+            echo "$FOUND"
+            echo ""
+            echo "Raw ECG signal files must NOT be committed."
+            echo "All clinical data must remain outside version control."
+            exit 1
+          fi
+          echo "✅ PASS: No raw clinical signal files found in repository."
+
+      - name: Audit report summary
+        run: |
+          echo ""
+          echo "═══════════════════════════════════════"
+          echo "  QALB PROVENANCE GUARD — PASSED ✅"
+          echo "═══════════════════════════════════════"
+          echo ""
+          echo "  ✓ DATASET_PROVENANCE.md present"
+          echo "  ✓ No trained model binaries"
+          echo "  ✓ No raw clinical dataset files"
+          echo ""

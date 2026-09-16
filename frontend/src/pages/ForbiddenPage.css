@@ -1,0 +1,29 @@
+.forbidden-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-light);
+  padding: var(--spacing-6);
+}
+
+.forbidden-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.text-critical {
+  color: var(--status-critical);
+}
+
+.forbidden-title {
+  font-size: 2rem;
+  color: var(--navy-dark);
+  margin-bottom: var(--spacing-4);
+}
+
+.forbidden-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-8);
+}

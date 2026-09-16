@@ -1,0 +1,59 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Success */
+.badge-success {
+  background-color: #ECFDF5;
+  color: var(--status-success);
+  border-color: #A7F3D0;
+}
+.badge-success .badge-dot { background-color: var(--status-success); }
+
+/* Info */
+.badge-info {
+  background-color: #F0F9FF;
+  color: var(--status-info);
+  border-color: #BAE6FD;
+}
+.badge-info .badge-dot { background-color: var(--status-info); }
+
+/* Warning */
+.badge-warning {
+  background-color: #FFFBEB;
+  color: var(--status-warning);
+  border-color: #FDE68A;
+}
+.badge-warning .badge-dot { background-color: var(--status-warning); }
+
+/* Critical */
+.badge-critical {
+  background-color: #FEF2F2;
+  color: var(--status-critical);
+  border-color: #FECACA;
+}
+.badge-critical .badge-dot { background-color: var(--status-critical); }
+
+/* Offline / Neutral */
+.badge-offline {
+  background-color: #F8FAFC;
+  color: var(--status-offline);
+  border-color: #E2E8F0;
+}
+.badge-offline .badge-dot { background-color: var(--status-offline); }
