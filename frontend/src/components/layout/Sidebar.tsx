@@ -25,17 +25,10 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <img src="/logo.png" alt="Qalb Logo" className="h-10 w-auto object-contain drop-shadow-sm" />
+        <img src="/logo.png" alt="Qalb Logo" className="sidebar-logo" />
       </div>
       
       <nav className="sidebar-nav">
-        <div className="nav-section">
-          <p className="nav-section-title">Home</p>
-          <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end>
-            <LayoutDashboard size={20} />
-            <span>Overview</span>
-          </NavLink>
-        </div>
 
         {(isFieldAgent || isPhysician) && (
           <div className="nav-section">

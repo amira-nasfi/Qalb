@@ -28,6 +28,11 @@ class User(AbstractUser):
     )
     organization = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=32, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    force_password_change = models.BooleanField(
+        default=False,
+        help_text="Requires user to change password on next login.",
+    )
     # last_login is already on AbstractUser
 
     class Meta:

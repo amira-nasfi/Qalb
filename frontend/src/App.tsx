@@ -9,6 +9,7 @@ import { ReviewPage } from './pages/ReviewPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { LoginPage } from './pages/LoginPage';
+import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { ForbiddenPage } from './pages/ForbiddenPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/403" element={<ForbiddenPage />} />
 
           {/* Authenticated routes */}

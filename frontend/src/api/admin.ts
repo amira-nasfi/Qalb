@@ -4,16 +4,18 @@ export interface AuditLogEntry {
   id: number;
   timestamp: string;
   action: string;
-  actor: string;
+  actor_label: string;
+  actor_display: string;
   target_type: string;
   target_id: string;
-  ip_address_hash: string;
+  old_value: any;
+  new_value: any;
+  ip_hash: string;
   extra: any;
-  hash_signature: string;
 }
 
 export const getAuditLogs = async (): Promise<AuditLogEntry[]> => {
-  const response = await apiClient.get("/api/admin/audit/");
+  const response = await apiClient.get("/api/audit/");
   if (response.data && "results" in response.data) {
     return (response.data as any).results;
   }

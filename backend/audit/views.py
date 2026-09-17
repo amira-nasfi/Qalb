@@ -5,13 +5,7 @@ from .models import AuditLog
 from .serializers import AuditLogSerializer
 
 
-class IsAdminUser(permissions.BasePermission):
-    """Only superusers or staff can view the audit log."""
-
-    def has_permission(self, request, view):
-        return bool(
-            request.user and (
-                request.user.is_staff or request.user.is_superuser))
+from accounts.permissions import IsAdmin
 
 
 class AuditLogListView(generics.ListAPIView):
@@ -29,7 +23,7 @@ class AuditLogListView(generics.ListAPIView):
     """
     queryset = AuditLog.objects.select_related("actor").all()
     serializer_class = AuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_fields = ["action", "target_type", "actor_label"]
     ordering_fields = ["timestamp", "action", "target_type"]
@@ -44,4 +38,4 @@ class AuditLogDetailView(generics.RetrieveAPIView):
     """
     queryset = AuditLog.objects.all()
     serializer_class = AuditLogSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]

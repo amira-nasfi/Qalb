@@ -40,8 +40,8 @@ class UserMeSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id", "username", "email", "first_name", "last_name",
-            "full_name", "role", "organization", "phone",
-            "is_suspended", "last_login", "date_joined",
+            "full_name", "role", "organization", "phone", "date_of_birth",
+            "is_suspended", "last_login", "date_joined", "force_password_change",
         ]
         read_only_fields = fields
 
@@ -63,6 +63,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "last_name",
             "role",
             "organization",
+            "date_of_birth",
             "is_suspended",
             "last_login",
             "date_joined",
@@ -73,33 +74,12 @@ class UserListSerializer(serializers.ModelSerializer):
         return obj.get_full_name()
 
 
-class UserInviteSerializer(serializers.ModelSerializer):
-    """ADMIN creates a new inactive account. A temporary password must be set."""
-    password = serializers.CharField(write_only=True, required=True)
-
-    class Meta:
-        model = User
-        fields = [
-            "username", "email", "first_name", "last_name",
-            "role", "organization", "phone", "password",
-        ]
-
-    def validate_password(self, value):
-        validate_password(value)
-        return value
-
-    def validate_role(self, value):
-        if value not in [Role.FIELD_AGENT, Role.PHYSICIAN, Role.ADMIN]:
-            raise serializers.ValidationError("Invalid role.")
-        return value
-
-    def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.is_active = True  # Activated immediately; email flow is optional
-        user.save()
-        return user
+class UserInviteSerializer(serializers.Serializer):
+    """Admin creates a new practitioner account."""
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    date_of_birth = serializers.DateField(required=True)
+    email = serializers.EmailField(required=True)
 
 
 class UserRoleUpdateSerializer(serializers.ModelSerializer):

@@ -1,10 +1,6 @@
 import axios, { AxiosError } from "axios";
 
-// Default base URL fallback for local development
-const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-
 const apiClient = axios.create({
-  baseURL,
   withCredentials: true, // For session/CSRF cookies if used
   headers: {
     "Content-Type": "application/json",
@@ -45,7 +41,7 @@ apiClient.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await axios.post(`${baseURL}/api/auth/refresh/`, {
+          const response = await axios.post(`/api/auth/refresh/`, {
             refresh: refreshToken,
           });
 

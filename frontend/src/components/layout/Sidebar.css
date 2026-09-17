@@ -19,6 +19,15 @@
   border-bottom: 1px solid var(--navy-base);
 }
 
+.sidebar-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  background-color: var(--bg-white);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+}
+
 .brand-icon {
   color: var(--mint-primary);
 }

@@ -13,6 +13,7 @@ export interface UserProfile {
   is_suspended: boolean;
   last_login: string;
   date_joined: string;
+  force_password_change?: boolean;
 }
 
 export interface AuthResponse {

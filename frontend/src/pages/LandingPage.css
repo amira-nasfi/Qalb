@@ -18,6 +18,13 @@
   text-align: center;
 }
 
+.landing-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: var(--spacing-4);
+}
+
 .brand-header {
   display: flex;
   align-items: center;

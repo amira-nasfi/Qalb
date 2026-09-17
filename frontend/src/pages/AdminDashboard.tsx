@@ -49,8 +49,6 @@ export const AdminDashboard: React.FC = () => {
                   <th>Action</th>
                   <th><User size={14} className="inline mr-1" /> Actor</th>
                   <th><Activity size={14} className="inline mr-1" /> Target</th>
-                  <th><Fingerprint size={14} className="inline mr-1" /> Origin Hash</th>
-                  <th>Payload Trace</th>
                 </tr>
               </thead>
               <tbody>
@@ -60,19 +58,9 @@ export const AdminDashboard: React.FC = () => {
                     <td>
                       <span className="action-badge">{log.action}</span>
                     </td>
-                    <td className="text-sm font-medium">{log.actor}</td>
+                    <td className="text-sm font-medium">{log.actor_display || log.actor_label || "Système"}</td>
                     <td className="text-sm text-mono">
                       {log.target_type} <span className="text-tertiary">#{log.target_id}</span>
-                    </td>
-                    <td>
-                      <span className="text-xs text-mono text-tertiary" title={log.ip_address_hash}>
-                        {log.ip_address_hash.substring(0, 12)}...
-                      </span>
-                    </td>
-                    <td>
-                       <div className="payload-box">
-                         {JSON.stringify(log.extra)}
-                       </div>
                     </td>
                   </tr>
                 ))}

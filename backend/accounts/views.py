@@ -143,6 +143,8 @@ class ChangePasswordView(APIView):
 
         user = request.user
         user.set_password(serializer.validated_data["new_password"])
+        if user.force_password_change:
+            user.force_password_change = False
         user.save()
         # Keeps session valid after password change
         update_session_auth_hash(request, user)
@@ -170,24 +172,37 @@ class UserListView(generics.ListAPIView):
     queryset = User.objects.all().order_by("last_name", "first_name")
 
 
-class UserInviteView(generics.CreateAPIView):
+class UserInviteView(APIView):
     """
     POST /api/admin/users/invite/
-    ADMIN-only. Creates a new user account with a specified role.
+    ADMIN-only. Creates a new practitioner account and emails credentials.
     """
     permission_classes = [IsAuthenticated, IsAdmin]
-    serializer_class = UserInviteSerializer
 
-    def perform_create(self, serializer):
-        user = serializer.save()
+    def post(self, request):
+        serializer = UserInviteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        from .services import create_practitioner_account
+        
+        user = create_practitioner_account(
+            first_name=serializer.validated_data["first_name"],
+            last_name=serializer.validated_data["last_name"],
+            date_of_birth=serializer.validated_data["date_of_birth"],
+            email=serializer.validated_data["email"],
+            creator_user=request.user
+        )
+
         AuditLog.log(
             action=AuditAction.INVITE,
             target_type="User",
             target_id=user.pk,
-            actor=self.request.user,
-            request=self.request,
+            actor=request.user,
+            request=request,
             extra={"role": user.role, "username": user.username},
         )
+        
+        return Response(UserListSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
 class UserSuspendView(APIView):

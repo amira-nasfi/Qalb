@@ -10,7 +10,7 @@ export const LandingPage: React.FC = () => {
     <div className="landing-page">
       <div className="hero-section">
         <div className="hero-content">
-            <img src="/logo.png" alt="Qalb Logo" className="h-16 w-auto object-contain drop-shadow-md" />
+            <img src="/logo.png" alt="Qalb Logo" className="landing-logo" />
           <h2 className="hero-subtitle">
             Clinical ECG Interpretation & Triage System
           </h2>
