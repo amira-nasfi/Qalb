@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { inviteUser } from "../../api/admin";
-import { UserPlus, CheckCircle, X } from "lucide-react";
+import { UserPlus, CheckCircle } from "lucide-react";
 import "./InviteModal.css";
 
 interface InviteModalProps {

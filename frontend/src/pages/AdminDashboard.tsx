@@ -3,7 +3,7 @@ import { getAuditLogs } from "../api/admin";
 import type { AuditLogEntry } from "../api/admin";
 import { Card } from "../components/ui/Card";
 import { Skeleton } from "../components/ui/Skeleton";
-import { Shield, Fingerprint, Clock, User, Activity } from "lucide-react";
+import { Shield, Clock, User, Activity } from "lucide-react";
 import "./AdminDashboard.css";
 
 export const AdminDashboard: React.FC = () => {

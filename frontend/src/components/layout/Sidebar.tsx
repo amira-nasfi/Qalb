@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, UploadCloud, FileText, ShieldAlert, Users, LogOut, HeartPulse } from 'lucide-react';
+import { UploadCloud, FileText, ShieldAlert, Users, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { logout } from '../../api/auth';
 import './Sidebar.css';
