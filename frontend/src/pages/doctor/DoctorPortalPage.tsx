@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getReports, claimReport } from "../../api/reports";
-import type { Report } from "../../types";
+import { getWorklist, openStudy } from "../../api/ecg";
+import type { Report, EcgStudy } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -15,14 +16,18 @@ import {
   Siren,
   ArrowRight,
   User,
+  Zap,
 } from "lucide-react";
 import "./DoctorPortalPage.css";
 
 /* ─── helpers ─────────────────────────────────────────────── */
 const severityOrder: Record<string, number> = {
   CRITICAL: 0,
+  RED: 0,
   URGENT: 1,
+  ORANGE: 1,
   ROUTINE: 2,
+  GREEN: 2,
 };
 
 const statusLabel: Record<string, string> = {
@@ -31,10 +36,17 @@ const statusLabel: Record<string, string> = {
   SIGNED: "Validé",
   RETAKE_REQUESTED: "Réacquisition demandée",
   EMERGENCY_TRANSFER: "Urgence SAMU",
+  transmitted: "Transmis au médecin",
+  reviewing: "En cours de lecture",
+  signed: "Validé et signé",
+  delivered: "Restitué au SIH",
+  acquired: "Acquis",
+  analysed: "Analysé",
+  rejected: "Rejeté",
 };
 
 const getSeverityLabel = (sev: string) =>
-  ({ CRITICAL: "CRITIQUE", URGENT: "URGENT", ROUTINE: "ROUTINE" }[sev] ?? sev);
+  ({ CRITICAL: "CRITIQUE", RED: "CRITIQUE (P1)", URGENT: "URGENT", ORANGE: "URGENT (P2)", ROUTINE: "ROUTINE", GREEN: "ROUTINE (P3)" }[sev] ?? sev);
 
 /* ─── component ───────────────────────────────────────────── */
 export const DoctorPortalPage: React.FC = () => {
@@ -42,15 +54,21 @@ export const DoctorPortalPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [reports, setReports] = useState<Report[]>([]);
+  const [studies, setStudies] = useState<EcgStudy[]>([]);
   const [loading, setLoading] = useState(true);
   const [claimingId, setClaimingId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const fetchReports = async () => {
     try {
-      const all = await getReports();
-      // Sort by severity then date
-      const sorted = [...all].sort((a, b) => {
+      const [allReports, allStudies] = await Promise.all([
+        getReports().catch(() => []),
+        getWorklist().catch(() => []),
+      ]);
+
+      setStudies(allStudies);
+
+      const sorted = [...allReports].sort((a, b) => {
         const sevDiff = (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3);
         if (sevDiff !== 0) return sevDiff;
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -65,7 +83,6 @@ export const DoctorPortalPage: React.FC = () => {
 
   useEffect(() => {
     fetchReports();
-    // Auto-refresh every 30 s
     const iv = setInterval(fetchReports, 30_000);
     return () => clearInterval(iv);
   }, []);
@@ -79,6 +96,26 @@ export const DoctorPortalPage: React.FC = () => {
     } catch (err: any) {
       const msg =
         err?.response?.data?.error ?? "Impossible de prendre en charge ce dossier.";
+      setToast({ message: msg, type: "error" });
+    } finally {
+      setClaimingId(null);
+    }
+  };
+
+  const isPhysician = user?.role === "PHYSICIAN";
+
+  const handleOpenStudy = async (studyId: number) => {
+    if (!isPhysician) {
+      navigate(`/review/${studyId}`);
+      return;
+    }
+    setClaimingId(studyId);
+    try {
+      await openStudy(studyId);
+      setToast({ message: "Examen pris en charge. Horodatage de lecture consigné dans l'audit.", type: "success" });
+      setTimeout(() => navigate(`/review/${studyId}`), 600);
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail ?? "Impossible d'ouvrir cette étude.";
       setToast({ message: msg, type: "error" });
     } finally {
       setClaimingId(null);
@@ -108,13 +145,35 @@ export const DoctorPortalPage: React.FC = () => {
         <div>
           <h1 className="portal-title">
             <Stethoscope size={28} className="inline mr-3 text-teal" />
-            Portail de Télé-Interprétation
+            {isPhysician ? "Portail de Télé-Interprétation" : "File d'attente ECG & Résultats"}
           </h1>
           <p className="portal-subtitle">
-            File d'expertise cardiologique · Mise à jour automatique toutes les 30 s
+            {isPhysician
+              ? "File d'expertise cardiologique · Mise à jour automatique toutes les 30 s"
+              : "Consultation de la file d'attente et des résultats générés (Accès praticien / agent terrain en lecture)"}
           </p>
         </div>
       </div>
+
+      {!isPhysician && (
+        <div style={{
+          background: "#eff6ff",
+          border: "1px solid #bfdbfe",
+          borderRadius: "8px",
+          padding: "10px 16px",
+          marginBottom: "16px",
+          color: "#1e40af",
+          fontSize: "0.85rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}>
+          <span>ℹ️</span>
+          <span>
+            <strong>Mode Consultation Praticien :</strong> Vous avez accès en lecture à l'ensemble de la file d'attente et aux résultats d'analyse automatique. La validation clinique et la signature sont réservées aux médecins télé-experts.
+          </span>
+        </div>
+      )}
 
       {/* ── KPI strip ── */}
       <div className="kpi-strip">
@@ -140,6 +199,93 @@ export const DoctorPortalPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Unified EcgStudy Prioritized Worklist ── */}
+      {studies.length > 0 && (
+        <section className="portal-section mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="section-title m-0">
+              <Zap size={18} className="text-warning inline mr-2" />
+              File Priorisée Clinique (Worklist Temps Réel)
+            </h2>
+            <span className="text-xs text-slate-500">
+              {studies.length} examen(s) actif(s) · Triés par urgence clinique
+            </span>
+          </div>
+
+          <div className="report-table">
+            <div className="table-header">
+              <span>Patient & IPP</span>
+              <span>Triage Clinique</span>
+              <span>État Boucle</span>
+              <span>Attente</span>
+              <span>Escalade</span>
+              <span></span>
+            </div>
+            {studies.map((s) => {
+              const triageLevel = typeof s.triage === "string" ? s.triage : s.triage?.level || s.triage_level || "";
+              const priority = s.priority || s.triage_priority || (typeof s.triage === "object" ? s.triage?.priority : undefined) || 3;
+              const isCrit = priority === 1 || triageLevel === "RED" || !!s.escalated;
+              const isUrg = priority === 2 || triageLevel === "ORANGE";
+              return (
+                <div
+                  key={s.study_id}
+                  className={`table-row ${isCrit ? "row-critical" : isUrg ? "row-urgent" : ""}`}
+                >
+                  <div className="cell-patient">
+                    <User size={15} style={{ color: "#0284c7" }} className="mr-1" />
+                    <span className="patient-name font-bold text-slate-900">
+                      {s.patient_name}
+                    </span>
+                    <span className="patient-age text-mono text-xs">
+                      #{s.patient_id.slice(0, 10)}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className={`status-chip ${isCrit ? "badge-error" : isUrg ? "status-urgent" : "status-routine"}`}>
+                      {triageLevel || `Priorité ${priority}`}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="status-chip">
+                      {statusLabel[s.state] || s.state}
+                    </span>
+                  </div>
+
+                  <div className="text-sm font-mono text-slate-600">
+                    <Clock size={12} className="inline mr-1 text-slate-400" />
+                    {s.waiting_s !== undefined ? `${Math.round(s.waiting_s)} s` : "—"}
+                  </div>
+
+                  <div>
+                    {s.escalated ? (
+                      <span className="flex items-center gap-1">
+                        <Siren size={13} className="text-critical" />
+                        <span className="text-xs font-bold text-critical">URGENCE</span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400">Standard</span>
+                    )}
+                  </div>
+
+                  <div className="cell-action">
+                    <Button
+                      size="sm"
+                      variant={isCrit ? "primary" : "secondary"}
+                      isLoading={claimingId === s.study_id}
+                      onClick={() => handleOpenStudy(s.study_id)}
+                    >
+                      {isPhysician ? "Lire le tracé" : "Consulter les résultats"} <ArrowRight size={14} className="ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── Open queue ── */}
       <section className="portal-section">
@@ -223,7 +369,15 @@ export const DoctorPortalPage: React.FC = () => {
 
                   {/* Action */}
                   <div className="cell-action">
-                    {isMyClaim ? (
+                    {!isPhysician ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => navigate(`/review/${r.id}`)}
+                      >
+                        Consulter les résultats <ArrowRight size={14} className="ml-1" />
+                      </Button>
+                    ) : isMyClaim ? (
                       <Button
                         size="sm"
                         variant="primary"

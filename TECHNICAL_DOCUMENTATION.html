@@ -892,55 +892,51 @@
       </div>
     </section>
 
-    <!-- 6. CYCLE DE VIE DU RAPPORT -->
+    <!-- 6. CYCLE DE VIE DU RAPPORT & BOUCLE MÉDICALE -->
     <section id="workflow">
-      <h2 class="section-title">6. Cycle de Vie du Rapport — Machine à États Étendue</h2>
+      <h2 class="section-title">6. Boucle Médicale Unifiée & Cycle de Vie de l'Examen (EcgStudy)</h2>
       <p>
-        Le statut d'un rapport ECG suit une machine à états stricte et non-bypasable. Avec le portail de télé-interprétation, la machine comprend désormais <strong>5 statuts distincts</strong> correspondant aux différentes issues cliniques possibles.
+        La prise en charge ECG est régie par une machine à états stricte, non-bypasable et tracée en continu dans le modèle unifié <strong>EcgStudy</strong> et son journal d'événements append-only <strong>AuditEvent</strong> :
       </p>
 
       <div class="diagram-container" style="margin-bottom: 1.5rem;">
         <pre class="diagram-box">
-[PENDING_REVIEW]
-      │  POST /api/reports/{id}/claim/  (PHYSICIAN only)
-      ▼
-[IN_REVIEW]  ← Médecin responsable verrouillé (claimed_by + claimed_at)
+[ACQUIRED]      → Signal ECG 12 dérivations déposé + métadonnées patient vérifiées
       │
-      ├── POST /api/reports/{id}/sign/        → [SIGNED]              ← Export FHIR débloqué
-      ├── POST /api/reports/{id}/retake/      → [RETAKE_REQUESTED]    ← Dispensaire notifié
-      └── POST /api/reports/{id}/emergency/   → [EMERGENCY_TRANSFER]  ← Alerte SAMU immédiate
+      ▼  Pipeline déterministe (< 1 000 ms)
+[ANALYSED]      → Qualité évaluée, intervalles mesurés, règles & CIM-10 calculées
+      │
+      ▼  Transmission au pool de télé-expertise
+[TRANSMITTED]   → Dossier disponible dans la file priorisée (P1 Rouge / P2 Orange / P3 Vert)
+      │
+      ▼  POST /api/ecg/studies/{id}/open/ (Médecin télé-expert)
+[REVIEWING]     → Horodatage de prise en charge consigné ; consultation du tracé
+      │
+      ├── POST /api/ecg/studies/{id}/sign/     → [SIGNED]     ← Validation & Signature électronique
+      │                                             │
+      │                                             ▼ POST /deliver/ (Restitution SIH)
+      │                                          [DELIVERED]  ← Export HL7 FHIR R4 transmis
+      └── Qualité signal insuffisante          → [REJECTED]   ← Demande réacquisition immédiate
         </pre>
       </div>
 
       <div class="grid-3">
         <div class="card">
-          <div class="card-title">① PENDING_REVIEW</div>
-          <p>Généré automatiquement dès la fin du traitement Celery.</p>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">L'équipe terrain ne peut pas consulter les interprétations cliniques préliminaires (sécurité 403).</p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">② IN_REVIEW</div>
-          <p>Le médecin a pris en charge le dossier via <code class="inline">POST /claim/</code>.</p>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Verrouillage collaboratif : si un autre médecin tente de prendre en charge, il reçoit un HTTP 409 Conflict.</p>
+          <div class="card-title">① ACQUIRED &amp; ANALYSED</div>
+          <p>Le tracé brut est ingéré et passé au crible du moteur scientifique déterministe en moins d'une seconde. Si le signal est inexploitable, il bascule directement en <code class="inline">REJECTED</code>.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Le praticien de terrain a accès au compte-rendu automatisé pour information clinique immédiate.</p>
         </div>
 
         <div class="card highlight">
-          <div class="card-title">③ SIGNED</div>
-          <p>Signature électronique irréversible. Rapport verrouillé en lecture seule.</p>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Débloque l'export HL7 FHIR R4 avec le numéro de licence du signataire dans le champ <code class="inline">performer</code>.</p>
+          <div class="card-title">② TRANSMITTED &amp; REVIEWING</div>
+          <p>Dossier mis à disposition des cardiologues télé-experts sur la worklist priorisée.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">L'ouverture du dossier par le médecin enregistre automatiquement un horodatage immuable (<code class="inline">opened_at</code>) permettant le calcul exact du temps d'attente.</p>
         </div>
 
         <div class="card">
-          <div class="card-title">④ RETAKE_REQUESTED</div>
-          <p>Le médecin a identifié un tracé inexploitable (artéfacts, inversion d'électrodes…).</p>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Un motif technique horodaté (<code class="inline">retake_reason</code>) est transmis au dispensaire pour réenregistrement.</p>
-        </div>
-
-        <div class="card critical">
-          <div class="card-title">⑤ EMERGENCY_TRANSFER</div>
-          <p>Le médecin a détecté une urgence vitale absolue et déclenche l'alerte SAMU.</p>
-          <p style="font-size: 0.85rem; color: var(--text-muted);">Les consignes immédiates (<code class="inline">emergency_notes</code>) sont transmises au dispensaire. Le dossier est verrouillé et l'action est irréversible. Une entrée d'audit de criticité maximale est horodatée.</p>
+          <div class="card-title">③ SIGNED &amp; DELIVERED</div>
+          <p>Le médecin télé-expert renseigne son avis clinique et appose sa signature électronique.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Le dossier est verrouillé définitivement. La restitution au Système d'Information Hospitalier (SIH) génère la ressource FHIR R4 et boucle le parcours patient.</p>
         </div>
       </div>
     </section>
@@ -975,6 +971,15 @@
         </div>
       </div>
 
+      <h3 class="subsection-title">Séparation Stricte : Analyse Automatisée vs. Avis Clinique Manuel</h3>
+      <p>
+        Pour prévenir tout <em>biais d'automatisation</em> (tendance du clinicien à valider passivement une proposition algorithmique) :
+      </p>
+      <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem; font-size: 0.95rem; color: #334155;">
+        <li><strong>Panneau Gauche — Compte Rendu Automatisé :</strong> Affiche les mesures objectives, la délinéation des ondes, les seuils dépassés et les codes CIM-10 identifiés par le moteur déterministe.</li>
+        <li><strong>Panneau Droit — Conclusion &amp; Avis Spécialisé :</strong> Reste <strong>totalement vide</strong> sur les dossiers en cours (<code class="inline">physician_report = ""</code>). Le médecin rédige personnellement ses conclusions et sa conduite à tenir avant de déclencher la signature électronique.</li>
+      </ul>
+
       <h3 class="subsection-title">Poste de Télé-Lecture (/review/:id) — Panneau Décisionnel</h3>
       <div class="table-container">
         <table>
@@ -982,45 +987,46 @@
             <tr>
               <th>Action</th>
               <th>Endpoint Backend</th>
-              <th>Statut Résultant</th>
-              <th>Champs Renseignés</th>
-              <th>Effet Immédiat</th>
+              <th>Acteur Autorisé</th>
+              <th>Effet Médico-Légal</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>🟢 <strong>Prendre en charge</strong></td>
-              <td><code class="inline">POST /api/reports/{id}/claim/</code></td>
-              <td><span class="badge badge-primary">IN_REVIEW</span></td>
-              <td><code class="inline">claimed_by</code>, <code class="inline">claimed_at</code></td>
-              <td>Verrouillage collaboratif. 409 Conflict si autre médecin.</td>
+              <td>👁️ <strong>Consultation Résultats</strong></td>
+              <td><code class="inline">GET /api/ecg/studies/{id}/</code></td>
+              <td>Praticien &amp; Médecin</td>
+              <td>Mode consultation lecture seule pour le praticien de terrain. Bannière informative active, actions de validation désactivées.</td>
+            </tr>
+            <tr>
+              <td>🟢 <strong>Prendre en charge l'examen</strong></td>
+              <td><code class="inline">POST /api/ecg/studies/{id}/open/</code></td>
+              <td>Médecin Télé-Expert</td>
+              <td>Horodatage de lecture consigné dans l'audit. État basculé en <code class="inline">reviewing</code>.</td>
             </tr>
             <tr>
               <td>✅ <strong>Valider &amp; Signer</strong></td>
-              <td><code class="inline">POST /api/reports/{id}/sign/</code></td>
-              <td><span class="badge badge-success">SIGNED</span></td>
-              <td><code class="inline">signed_by</code>, <code class="inline">signed_at</code>, <code class="inline">physician_notes</code></td>
-              <td>Export FHIR R4 débloqué. Rapport verrouillé en lecture seule.</td>
+              <td><code class="inline">POST /api/ecg/studies/{id}/sign/</code></td>
+              <td>Médecin Télé-Expert uniquement</td>
+              <td>Enregistrement de l'avis rédigé, signature électronique avec nom et titre, scellement irréversible (<code class="inline">signed</code>) et calcul du turnaround time.</td>
             </tr>
             <tr>
-              <td>🔄 <strong>Réacquisition ECG</strong></td>
+              <td>🔄 <strong>Demander réacquisition ECG</strong></td>
               <td><code class="inline">POST /api/reports/{id}/retake/</code></td>
-              <td><span class="badge badge-warning">RETAKE_REQUESTED</span></td>
-              <td><code class="inline">retake_reason</code> (motif technique obligatoire)</td>
-              <td>Dispensaire informé du problème technique avec instructions de réenregistrement.</td>
+              <td>Médecin Télé-Expert uniquement</td>
+              <td>Notification immédiate au dispensaire avec motif technique pour un nouvel enregistrement de tracé.</td>
             </tr>
             <tr>
-              <td>🚨 <strong>Urgence SAMU</strong></td>
-              <td><code class="inline">POST /api/reports/{id}/emergency/</code></td>
-              <td><span class="badge badge-critical">EMERGENCY_TRANSFER</span></td>
-              <td><code class="inline">emergency_notes</code> (consignes immédiates obligatoires), <code class="inline">signed_by</code>, <code class="inline">signed_at</code></td>
-              <td>Alerte vitale transmise instantanément. Dossier verrouillé. Action irréversible. Entrée audit maximale.</td>
+              <td>🏥 <strong>Restituer au SIH</strong></td>
+              <td><code class="inline">POST /api/ecg/studies/{id}/deliver/</code></td>
+              <td>Médecin / Admin / Système</td>
+              <td>Transmission de la ressource FHIR DiagnosticReport finalisée dans le Dossier Patient Informatisé.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3 class="subsection-title">Modèle de Données — Champs de Télé-Interprétation</h3>
+      <h3 class="subsection-title">Modèle de Données — Champs de Traçabilité Clinique</h3>
       <div class="table-container">
         <table>
           <thead>
@@ -1032,35 +1038,37 @@
           </thead>
           <tbody>
             <tr>
-              <td><code class="inline">claimed_by</code></td>
-              <td>ForeignKey(User, null=True)</td>
-              <td>Médecin ayant pris en charge le dossier (verrouillage collaboratif).</td>
-            </tr>
-            <tr>
-              <td><code class="inline">claimed_at</code></td>
+              <td><code class="inline">opened_at</code></td>
               <td>DateTimeField(null=True)</td>
-              <td>Horodatage de la prise en charge (traçabilité médico-légale).</td>
+              <td>Horodatage précis de la prise en charge par le spécialiste.</td>
             </tr>
             <tr>
-              <td><code class="inline">retake_reason</code></td>
-              <td>TextField(blank=True)</td>
-              <td>Motif technique de rejet du tracé (artéfacts, inversion d'électrodes, bruit…).</td>
+              <td><code class="inline">reader</code></td>
+              <td>ForeignKey(User, null=True)</td>
+              <td>Médecin télé-expert ayant pris en charge et examiné le tracé.</td>
             </tr>
             <tr>
-              <td><code class="inline">emergency_notes</code></td>
+              <td><code class="inline">signature</code></td>
+              <td>CharField(max_length=255)</td>
+              <td>Signature électronique certifiée (Nom, titre et qualité du médecin).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">signed_at</code></td>
+              <td>DateTimeField(null=True)</td>
+              <td>Horodatage légal de la signature électronique.</td>
+            </tr>
+            <tr>
+              <td><code class="inline">physician_report</code></td>
               <td>TextField(blank=True)</td>
-              <td>Consignes immédiates transmises au dispensaire en cas d'urgence vitale absolue.</td>
+              <td>Conclusions diagnostiques et avis spécialisé saisis manuellement par le médecin (vide sur dossiers non signés).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">turnaround_s</code></td>
+              <td>FloatField(null=True)</td>
+              <td>Chronométrie totale de la boucle médicale en secondes (de l'acquisition à la signature/restitution).</td>
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div class="callout callout-danger">
-        <div class="callout-icon">⚠️</div>
-        <div class="callout-content">
-          <p><strong>Sécurité des Actions Irréversibles :</strong></p>
-          <p>L'action <em>Urgence SAMU</em> est protégée par une modale de confirmation avec champ de saisie des consignes obligatoire. Elle ne peut être déclenchée qu'une fois, par un médecin authentifié (<code class="inline">IsPhysician</code>), et produit immédiatement une entrée d'audit immuable.</p>
-        </div>
       </div>
     </section>
 
@@ -1260,11 +1268,12 @@
 
     <!-- 11. DASHBOARD ADMIN & KPIS -->
     <section id="admin-kpi">
-      <h2 class="section-title">11. Dashboard Administrateur & Métriques Live (KPIs)</h2>
+      <h2 class="section-title">11. Dashboard Administrateur &amp; Piste d'Audit Système</h2>
       <p>
-        Accessible à l'URL <code class="inline">/admin</code> pour les utilisateurs au rôle <code class="inline">ADMIN</code>, le tableau de bord offre une visibilité instantanée sur les flux d'activité grâce à un polling automatique toutes les 30 secondes :
+        Accessible à l'URL <code class="inline">/admin</code> pour les utilisateurs au rôle <code class="inline">ADMIN</code>, le tableau de bord offre une visibilité instantanée sur les flux d'activité et la conformité médico-légale via le journal d'audit immuable et les métriques opérationnelles (KPIs) :
       </p>
 
+      <h3 class="subsection-title">Métriques Opérationnelles Globales (Topbar &amp; Polling 30 s)</h3>
       <div class="grid-3">
         <div class="card">
           <div class="card-title">Uploads Aujourd'hui</div>

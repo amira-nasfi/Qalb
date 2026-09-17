@@ -22,6 +22,34 @@ export const getAuditLogs = async (): Promise<AuditLogEntry[]> => {
   return response.data as AuditLogEntry[];
 };
 
+export interface LoopTimingLeg {
+  leg: string;
+  seconds: number;
+}
+
+export interface LoopAuditEntry {
+  study_id: number;
+  patient_id: string;
+  patient_name: string;
+  state: string;
+  triage_level: string | null;
+  triage_priority: number;
+  escalated: boolean;
+  acquired_at: string | null;
+  analysed_at: string | null;
+  transmitted_at: string | null;
+  read_at: string | null;
+  signed_at: string | null;
+  turnaround_s: number | null;
+  loop_timings: LoopTimingLeg[];
+  event_count: number;
+}
+
+export const getLoopAuditSummary = async (): Promise<LoopAuditEntry[]> => {
+  const response = await apiClient.get<LoopAuditEntry[]>("/api/ecg/studies/loop-audit/");
+  return response.data;
+};
+
 export interface UserItem {
   id: number;
   username: string;

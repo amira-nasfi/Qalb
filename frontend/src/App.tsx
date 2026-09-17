@@ -46,13 +46,10 @@ const App: React.FC = () => {
               <Route path="/upload" element={<AppLayout><UploadPage /></AppLayout>} />
             </Route>
 
-            {/* Physician only */}
-            <Route element={<ProtectedRoute allowedRoles={['PHYSICIAN']} />}>
+            {/* Field Agent, Physician & Admin: Worklist & Results Review */}
+            <Route element={<ProtectedRoute allowedRoles={['FIELD_AGENT', 'PHYSICIAN', 'ADMIN']} />}>
               <Route path="/doctor" element={<AppLayout><DoctorPortalPage /></AppLayout>} />
-            </Route>
-
-            {/* Physician & Admin */}
-            <Route element={<ProtectedRoute allowedRoles={['PHYSICIAN', 'ADMIN']} />}>
+              <Route path="/worklist" element={<AppLayout><DoctorPortalPage /></AppLayout>} />
               <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
               <Route path="/review/:id" element={<AppLayout><ReviewPage /></AppLayout>} />
               <Route path="/result/:id" element={<AppLayout><ReviewPage /></AppLayout>} />

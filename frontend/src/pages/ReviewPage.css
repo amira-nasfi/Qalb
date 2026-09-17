@@ -308,3 +308,194 @@
 .text-critical { color: #ef4444; }
 .text-warning  { color: #f59e0b; }
 
+/* ── Measurements & Findings ────────────────────────────────── */
+.measurements-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.measurements-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.measurements-table th {
+  background: #f8fafc;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.measurements-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.findings-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.findings-heading {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.findings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.finding-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.finding-main-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.finding-item.finding-red {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+  color: #991b1b;
+}
+
+.finding-item.finding-orange {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  color: #9a3412;
+}
+
+.finding-item.finding-green {
+  background: #f0fdf4;
+  border-left: 3px solid #10b981;
+  color: #065f46;
+}
+
+.finding-comp {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.finding-text {
+  font-weight: 500;
+}
+
+.finding-cite {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-style: italic;
+  margin-left: auto;
+}
+
+.finding-diagnosis {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 3px 8px;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  width: fit-content;
+}
+
+.finding-item.finding-red .finding-diagnosis {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.finding-item.finding-orange .finding-diagnosis {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.diagnosis-badge {
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #4f46e5;
+}
+
+.finding-item.finding-red .diagnosis-badge {
+  color: #b91c1c;
+}
+
+.finding-item.finding-orange .diagnosis-badge {
+  color: #b45309;
+}
+
+.diagnosis-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.diagnosis-icd10 {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.finding-item.finding-red .diagnosis-icd10 {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.finding-item.finding-orange .diagnosis-icd10 {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.finding-detail-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: #475569;
+}
+
+.finding-measured {
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: #334155;
+}
+
+.finding-threshold {
+  color: #64748b;
+  font-style: italic;
+}
+
+.finding-meaning {
+  color: #64748b;
+}
+
+
+

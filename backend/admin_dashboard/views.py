@@ -15,7 +15,7 @@ class KPIDashboardView(APIView):
     GET /api/admin/kpis/
     Returns live metrics for the fixed navbar.
     """
-    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)

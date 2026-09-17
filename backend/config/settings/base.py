@@ -9,6 +9,12 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+import sys
+# Ensure ecg_analysis package is discoverable
+ECG_ANALYSIS_PATH = str(BASE_DIR / "ecg_analysis")
+if ECG_ANALYSIS_PATH not in sys.path:
+    sys.path.insert(0, ECG_ANALYSIS_PATH)
+
 env = environ.Env(DEBUG=(bool, False))
 
 # Read .env file if present

@@ -1,20 +1,294 @@
+/* ═══════════════════════════════════════════════════════════
+   AdminDashboard — layout & shared
+   ═══════════════════════════════════════════════════════════ */
 .admin-page {
   padding: var(--spacing-8) var(--spacing-6);
-  max-width: 1400px;
+  max-width: 1500px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-10);
 }
 
 .admin-header {
-  margin-bottom: var(--spacing-8);
+  margin-bottom: var(--spacing-2);
 }
 
+/* ── Section framing ───────────────────────────────────────── */
+.section-header {
+  margin-bottom: var(--spacing-4);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+}
+
+.section-sub {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOOP AUDIT — KPI bar
+   ═══════════════════════════════════════════════════════════ */
+.loop-kpi-bar {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-4);
+}
+
+.loop-kpi-card {
+  flex: 1;
+  min-width: 130px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4) var(--spacing-5);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+.loop-kpi-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.10); }
+
+.lkpi-icon {
+  color: var(--text-secondary);
+}
+.lkpi-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.lkpi-label {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOOP TABLE
+   ═══════════════════════════════════════════════════════════ */
+.loop-audit-card,
+.audit-card {
+  overflow: hidden;
+}
+
+.loop-table th,
 .audit-table th {
   background-color: var(--navy-dark) !important;
   color: var(--bg-white) !important;
   border-bottom: none !important;
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
+.loop-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.loop-row:hover { background-color: rgba(59,130,246,0.04); }
+.loop-row-expanded { background-color: rgba(59,130,246,0.06) !important; }
+
+/* Patient cell */
+.patient-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.patient-name { font-weight: 600; font-size: 0.85rem; }
+.patient-id { font-size: 0.72rem; font-family: var(--font-mono); }
+
+/* State chips */
+.state-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.state-acquired    { background: #dbeafe; color: #1e40af; }
+.state-analysed    { background: #ede9fe; color: #6d28d9; }
+.state-transmitted { background: #e0f2fe; color: #0369a1; }
+.state-read        { background: #fef9c3; color: #854d0e; }
+.state-signed      { background: #dcfce7; color: #166534; }
+.state-delivered   { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.state-rejected    { background: #fee2e2; color: #991b1b; }
+
+/* Triage badges */
+.triage-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.triage-red    { background: #fee2e2; color: #b91c1c; }
+.triage-orange { background: #ffedd5; color: #c2410c; }
+.triage-green  { background: #dcfce7; color: #166534; }
+
+/* Turnaround badges */
+.turnaround-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.turnaround-ok   { background: #d1fae5; color: #065f46; }
+.turnaround-slow { background: #fee2e2; color: #991b1b; }
+
+/* Timing chips */
+.timing-legs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.timing-chip {
+  font-size: 0.7rem;
+  background: var(--bg-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 1px 5px;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+/* Pipeline mini progress */
+.loop-pipeline {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.pipeline-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+.dot-done { color: #10b981; }
+.dot-pending { color: #d1d5db; }
+.dot-current { color: #3b82f6; }
+.pipeline-connector {
+  width: 10px;
+  height: 2px;
+  background: #d1d5db;
+  border-radius: 1px;
+}
+.connector-done { background: #10b981; }
+
+/* ═══════════════════════════════════════════════════════════
+   EXPANDED DETAIL ROW
+   ═══════════════════════════════════════════════════════════ */
+.loop-detail-row td {
+  background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
+  border-bottom: 2px solid var(--border-subtle);
+}
+
+.loop-detail-panel {
+  padding: var(--spacing-5) var(--spacing-6);
+}
+
+.detail-title {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.timeline-steps {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  min-width: 120px;
+  max-width: 150px;
+}
+
+.step-icon-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  font-size: 1rem;
+}
+.step-done .step-icon-wrap {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+.step-pending .step-icon-wrap {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.step-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.step-ts {
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  text-align: center;
+}
+.step-done .step-ts { color: #065f46; font-weight: 600; }
+
+.step-arrow {
+  position: absolute;
+  right: -12px;
+  top: 8px;
+}
+
+.detail-footer {
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-3);
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.loop-error-state {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-6);
+  color: var(--text-warning);
+  font-size: 0.85rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SYSTEM AUDIT — table
+   ═══════════════════════════════════════════════════════════ */
 .action-badge {
   display: inline-block;
   padding: 2px 6px;
@@ -28,13 +302,15 @@
   text-transform: uppercase;
 }
 
-.text-xs {
-  font-size: 0.75rem;
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
+/* Utility helpers */
+.text-xs { font-size: 0.75rem; }
+.font-mono { font-family: var(--font-mono); }
+.text-primary { color: var(--color-primary, #3b82f6); }
+.text-success { color: #10b981; }
+.text-danger  { color: #ef4444; }
+.text-warning { color: #f59e0b; }
+.text-mint    { color: var(--color-mint, #06b6d4); }
+.text-tertiary { color: var(--text-tertiary); }
 
 .payload-box {
   font-family: var(--font-mono);

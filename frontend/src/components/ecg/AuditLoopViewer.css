@@ -1,0 +1,269 @@
+.audit-loop-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.audit-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.audit-title-block {
+  display: flex;
+  align-items: flex-start;
+}
+
+.audit-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.audit-sub {
+  margin: 4px 0 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.turnaround-kpi-chip {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 10px;
+  padding: 10px 18px;
+  text-align: right;
+  min-width: 220px;
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.kpi-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #15803d;
+  font-family: var(--font-mono, monospace);
+}
+
+.kpi-unit {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #166534;
+}
+
+.kpi-pending {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #d97706;
+}
+
+.kpi-desc {
+  font-size: 0.7rem;
+  color: #4ade80;
+}
+
+.loop-legs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.loop-leg-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leg-name {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.leg-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0284c7;
+  font-family: var(--font-mono, monospace);
+}
+
+.loop-chart-section {
+  background: #fafafa;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  margin: 0 0 12px 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.loop-chart-wrapper {
+  width: 100%;
+}
+
+.pipeline-timings-strip {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+
+.pipeline-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.pipeline-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.pipeline-steps-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pipeline-chip {
+  background: #ffffff;
+  border: 1px solid #fde68a;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  color: #78350f;
+}
+
+.his-delivery-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.delivery-info {
+  display: flex;
+  align-items: center;
+}
+
+.delivery-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.sim-failure-btn {
+  border-color: #f59e0b !important;
+  color: #b45309 !important;
+}
+
+.sim-failure-btn:hover {
+  background: #fef3c7 !important;
+}
+
+.audit-trail-table-section {
+  margin-top: 10px;
+}
+
+.table-title {
+  margin: 0 0 10px 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.audit-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.audit-table th {
+  background: #f8fafc;
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.audit-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.row-error {
+  background: #fef2f2;
+}
+
+.row-success {
+  background: #f0fdf4;
+}
+
+.action-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.badge-error {
+  background: #fee2e2;
+  color: #991b1b;
+}

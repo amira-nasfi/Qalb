@@ -43,6 +43,10 @@ export const Sidebar: React.FC = () => {
               <UploadCloud size={20} />
               <span>Acquisition ECG</span>
             </NavLink>
+            <NavLink to="/doctor" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <Stethoscope size={20} />
+              <span>File d'attente ECG</span>
+            </NavLink>
             <NavLink to="/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <FileText size={20} />
               <span>Suivi des examens</span>
