@@ -23,13 +23,13 @@ from django.core.files.base import ContentFile
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
 django.setup()
 
-import neurokit2 as nk
-from patients.models import Patient
-from ecg.models import ECGRecord, ProcessingResult
-from reports.models import Report
-from reports.utils import generate_draft
-from audit.models import AuditLog, AuditAction
-from accounts.models import User, Role
+import neurokit2 as nk  # noqa: E402
+from patients.models import Patient  # noqa: E402
+from ecg.models import ECGRecord, ProcessingResult  # noqa: E402
+from reports.models import Report  # noqa: E402
+from reports.utils import generate_draft  # noqa: E402
+from audit.models import AuditLog, AuditAction  # noqa: E402
+from accounts.models import User, Role  # noqa: E402
 
 STANDARD_LEADS = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"]
 
@@ -385,5 +385,7 @@ def run():
 
     print("=== Mock data successfully created! ===")
 
+
 if __name__ == "__main__":
     run()
+
