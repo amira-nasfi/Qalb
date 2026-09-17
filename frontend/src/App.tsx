@@ -6,6 +6,7 @@ import { LandingPage } from './pages/LandingPage';
 import { UploadPage } from './pages/UploadPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { DoctorPortalPage } from './pages/doctor/DoctorPortalPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { LoginPage } from './pages/LoginPage';
@@ -43,6 +44,11 @@ const App: React.FC = () => {
             {/* Field Agent & Physician */}
             <Route element={<ProtectedRoute allowedRoles={['FIELD_AGENT', 'PHYSICIAN']} />}>
               <Route path="/upload" element={<AppLayout><UploadPage /></AppLayout>} />
+            </Route>
+
+            {/* Physician only */}
+            <Route element={<ProtectedRoute allowedRoles={['PHYSICIAN']} />}>
+              <Route path="/doctor" element={<AppLayout><DoctorPortalPage /></AppLayout>} />
             </Route>
 
             {/* Physician & Admin */}

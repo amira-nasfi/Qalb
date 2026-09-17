@@ -10,20 +10,20 @@ export const LandingPage: React.FC = () => {
     <div className="landing-page">
       <div className="hero-section">
         <div className="hero-content">
-            <img src="/logo.png" alt="Qalb Logo" className="landing-logo" />
+          <img src="/logo.png" alt="Logo Qalb" className="landing-logo" />
           <h2 className="hero-subtitle">
-            Clinical ECG Interpretation & Triage System
+            Système Clinique de Dépistage & Triage ECG
           </h2>
           <p className="hero-description">
-            A mission-critical operational platform designed for SAMU and emergency medical services.
-            Deterministic signal processing with fully traceable clinical rules.
+            Plateforme médicale opérationnelle pour les centres de soins de première ligne et services d'urgence.
+            Traitement déterministe du signal avec règles cliniques rigoureusement traçables.
           </p>
           <div className="hero-actions">
             <Link to="/upload">
-              <Button size="lg" className="w-full">Initiate Field Upload</Button>
+              <Button size="lg" className="w-full">Nouvelle acquisition ECG</Button>
             </Link>
             <Link to="/dashboard">
-              <Button variant="secondary" size="lg" className="w-full">Access Clinical Queue</Button>
+              <Button variant="secondary" size="lg" className="w-full">Accéder à la file clinique</Button>
             </Link>
           </div>
         </div>
@@ -33,18 +33,18 @@ export const LandingPage: React.FC = () => {
         <div className="features-grid">
           <Card className="feature-card">
             <Activity size={24} className="feature-icon text-mint" />
-            <h3 className="feature-title">Deterministic Processing</h3>
-            <p className="feature-desc">Explainable NeuroKit2 pipeline without opaque ML scoring.</p>
+            <h3 className="feature-title">Traitement Déterministe</h3>
+            <p className="feature-desc">Pipeline NeuroKit2 transparent et explicable, sans modèle opaque boîte noire.</p>
           </Card>
           <Card className="feature-card">
             <ShieldCheck size={24} className="feature-icon text-mint" />
-            <h3 className="feature-title">AHA/ESC Compliant</h3>
-            <p className="feature-desc">8 clinical rules fully traceable to published guidelines.</p>
+            <h3 className="feature-title">Conformité AHA / ESC</h3>
+            <p className="feature-desc">8 règles cliniques déterministes appuyées sur la littérature internationale.</p>
           </Card>
           <Card className="feature-card">
             <UserCheck size={24} className="feature-icon text-mint" />
-            <h3 className="feature-title">Physician Validation</h3>
-            <p className="feature-desc">Mandatory human-in-the-loop review and digital sign-off.</p>
+            <h3 className="feature-title">Validation Médicale</h3>
+            <p className="feature-desc">Revue obligatoire par le médecin avec signature électronique irréversible.</p>
           </Card>
         </div>
       </div>

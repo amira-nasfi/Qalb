@@ -182,7 +182,7 @@ class UserInviteView(APIView):
     def post(self, request):
         serializer = UserInviteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+        from .models import Role
         from .services import create_practitioner_account
         
         user = create_practitioner_account(
@@ -190,6 +190,8 @@ class UserInviteView(APIView):
             last_name=serializer.validated_data["last_name"],
             date_of_birth=serializer.validated_data["date_of_birth"],
             email=serializer.validated_data["email"],
+            role=serializer.validated_data.get("role", Role.FIELD_AGENT),
+            license_number=serializer.validated_data.get("license_number"),
             creator_user=request.user
         )
 

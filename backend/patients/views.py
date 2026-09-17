@@ -1,17 +1,18 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from .models import Patient
 from .serializers import PatientSerializer
 
 
-class PatientCreateView(generics.CreateAPIView):
+class PatientListCreateView(generics.ListCreateAPIView):
     """
-    POST /api/patients/
-    Register a new pseudonymized patient. Returns a system-generated pseudo_id.
-    No personal identifiers accepted or stored.
+    GET /api/patients/ - List patients with search.
+    POST /api/patients/ - Register a new patient.
     """
-    queryset = Patient.objects.all()
+    queryset = Patient.objects.all().order_by("-created_at")
     serializer_class = PatientSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["patient_identifier", "last_name", "first_name", "pseudo_id"]
 
 
 class PatientDetailView(generics.RetrieveAPIView):

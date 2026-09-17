@@ -166,3 +166,145 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Back button ────────────────────────────────────────────── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--text-tertiary, #8898a9);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.2rem;
+  transition: color 0.15s;
+}
+.back-btn:hover { color: var(--text-primary, #e8edf3); }
+
+/* ── Claim banners ──────────────────────────────────────────── */
+.claim-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+.claim-banner-mine {
+  background: rgba(45, 212, 191, 0.12);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  color: #2dd4bf;
+}
+.claim-banner-other {
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+/* ── Retake banner ──────────────────────────────────────────── */
+.retake-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+}
+
+/* ── Emergency banner ───────────────────────────────────────── */
+.emergency-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* ── Modals ─────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: var(--surface-card, #111827);
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+}
+
+.modal-box-danger {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #e8edf3);
+  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #b0bec8);
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--surface-input, rgba(255,255,255,0.05));
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+  border-radius: 8px;
+  color: var(--text-primary, #e8edf3);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  resize: vertical;
+  margin-bottom: 1.25rem;
+  box-sizing: border-box;
+}
+
+.modal-textarea:focus {
+  outline: none;
+  border-color: var(--mint-dark, #2dd4bf);
+}
+
+.modal-textarea-danger:focus {
+  border-color: #ef4444;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.text-critical { color: #ef4444; }
+.text-warning  { color: #f59e0b; }
+

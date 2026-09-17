@@ -37,7 +37,7 @@ export const Topbar: React.FC = () => {
       
       <div className="topbar-right">
         {!kpis ? (
-          <div className="kpi-skeleton text-sm text-secondary">Connecting to operational metrics...</div>
+          <div className="kpi-skeleton text-sm text-secondary">Connexion aux métriques opérationnelles...</div>
         ) : (
           <div className="kpi-group">
             <div className="kpi-metric">
@@ -45,16 +45,16 @@ export const Topbar: React.FC = () => {
               <span className="kpi-value text-mono tnum">{kpis.uploads_today}</span>
             </div>
             <div className="kpi-metric">
-              <span className="kpi-label">Pending</span>
+              <span className="kpi-label">En attente</span>
               <span className="kpi-value text-mono tnum">{kpis.pending_reviews}</span>
             </div>
             <div className={`kpi-metric ${kpis.critical_active > 0 ? "kpi-alert" : ""}`}>
               <Activity size={14} className="mr-1" />
-              <span className="kpi-label">Critical</span>
+              <span className="kpi-label">Critiques</span>
               <span className="kpi-value text-mono tnum">{kpis.critical_active}</span>
             </div>
             <div className="kpi-metric">
-              <span className="kpi-label">Avg TTL</span>
+              <span className="kpi-label">Temps moyen</span>
               <span className="kpi-value text-mono tnum">{kpis.avg_processing_ms}ms</span>
             </div>
           </div>

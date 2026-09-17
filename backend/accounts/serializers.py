@@ -75,11 +75,30 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class UserInviteSerializer(serializers.Serializer):
-    """Admin creates a new practitioner account."""
+    """Admin creates a new user account: Practitioner (auto 8-digit ID) or Physician (manual medical license)."""
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     date_of_birth = serializers.DateField(required=True)
     email = serializers.EmailField(required=True)
+    role = serializers.ChoiceField(
+        choices=[Role.FIELD_AGENT, Role.PHYSICIAN],
+        default=Role.FIELD_AGENT,
+    )
+    license_number = serializers.CharField(required=False, allow_blank=True, default="")
+
+    def validate(self, data):
+        role = data.get("role", Role.FIELD_AGENT)
+        license_num = data.get("license_number", "").strip()
+        if role == Role.PHYSICIAN:
+            if not license_num:
+                raise serializers.ValidationError({
+                    "license_number": "Le numéro de licence médicale (RPPS) est obligatoire pour un compte Médecin."
+                })
+            if User.objects.filter(username=license_num).exists():
+                raise serializers.ValidationError({
+                    "license_number": "Un médecin avec ce numéro de licence existe déjà."
+                })
+        return data
 
 
 class UserRoleUpdateSerializer(serializers.ModelSerializer):

@@ -1,5 +1,6 @@
 """
 HL7 FHIR R4 Bundle builder for ECG reports.
+Embeds standard Patient, Observation, and DiagnosticReport resources.
 """
 
 from reports.models import Report
@@ -66,7 +67,7 @@ def build_observation(report: Report) -> dict:
             }
         })
 
-    pseudo_id = str(report.result.record.patient.pseudo_id)
+    patient_pseudo_id = str(report.result.record.patient.pseudo_id)
 
     return {
         "resourceType": "Observation",
@@ -76,7 +77,7 @@ def build_observation(report: Report) -> dict:
             "coding": [{"system": "http://loinc.org", "code": LOINC_ECG_STUDY}]
         },
         "subject": {
-            "reference": f"Patient/{pseudo_id}"
+            "reference": f"Patient/{patient_pseudo_id}"
         },
         "effectiveDateTime": report.result.record.uploaded_at.isoformat(),
         "component": components
@@ -101,7 +102,7 @@ def build_diagnostic_report(report: Report, obs_id: str) -> dict:
             ]
         })
 
-    pseudo_id = str(report.result.record.patient.pseudo_id)
+    patient_pseudo_id = str(report.result.record.patient.pseudo_id)
 
     return {
         "resourceType": "DiagnosticReport",
@@ -111,13 +112,13 @@ def build_diagnostic_report(report: Report, obs_id: str) -> dict:
             "coding": [{"system": "http://loinc.org", "code": LOINC_ECG_STUDY}]
         },
         "subject": {
-            "reference": f"Patient/{pseudo_id}"
+            "reference": f"Patient/{patient_pseudo_id}"
         },
         "effectiveDateTime": report.result.record.uploaded_at.isoformat(),
         "issued": report.signed_at.isoformat() if report.signed_at else None,
         "performer": [
             {
-                "display": report.signed_by.get_full_name() if report.signed_by else "Unknown"
+                "display": report.signed_by.get_full_name() or report.signed_by.username if report.signed_by else "Médecin praticien"
             }
         ],
         "result": [
@@ -129,7 +130,9 @@ def build_diagnostic_report(report: Report, obs_id: str) -> dict:
 
 
 def build_bundle(report: Report) -> dict:
-    """FHIR Bundle wrapping both resources."""
+    """FHIR Bundle wrapping Patient, Observation, and DiagnosticReport."""
+    patient = report.result.record.patient
+    patient_resource = patient.to_fhir_resource()
     obs = build_observation(report)
     dr = build_diagnostic_report(report, obs["id"])
 
@@ -137,6 +140,7 @@ def build_bundle(report: Report) -> dict:
         "resourceType": "Bundle",
         "type": "collection",
         "entry": [
+            {"resource": patient_resource},
             {"resource": obs},
             {"resource": dr}
         ]

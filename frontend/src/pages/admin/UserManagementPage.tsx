@@ -47,7 +47,7 @@ export const UserManagementPage: React.FC = () => {
         </div>
         <button className="um-btn-invite" onClick={() => setIsInviteModalOpen(true)}>
           <UserPlus size={18} /> 
-          Gestion comptes praticiens
+          + Nouveau Compte (Praticien / Médecin)
         </button>
       </div>
 
@@ -56,8 +56,9 @@ export const UserManagementPage: React.FC = () => {
           <table className="um-table">
             <thead>
               <tr>
-                <th>Praticien</th>
+                <th>Personnel</th>
                 <th>Rôle</th>
+                <th>Identifiant / N° Licence</th>
                 <th>Organisation</th>
                 <th>Statut</th>
                 <th style={{ textAlign: "right" }}>Actions</th>
@@ -85,8 +86,11 @@ export const UserManagementPage: React.FC = () => {
                     </td>
                     <td>
                       <span className={`um-role-badge ${roleClass}`}>
-                        {user.role}
+                        {user.role === 'PHYSICIAN' ? 'Médecin' : user.role === 'ADMIN' ? 'Administrateur' : 'Praticien'}
                       </span>
+                    </td>
+                    <td className="text-sm font-mono font-semibold" style={{ color: "#0284c7" }}>
+                      {user.username}
                     </td>
                     <td className="text-sm font-medium text-secondary">
                       {user.organization || '-'}
@@ -111,7 +115,7 @@ export const UserManagementPage: React.FC = () => {
                 );
               })}
               {users.length === 0 && !isLoading && (
-                <tr><td colSpan={5} className="p-8 text-center text-secondary">Aucun utilisateur trouvé.</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-secondary">Aucun utilisateur trouvé.</td></tr>
               )}
             </tbody>
           </table>

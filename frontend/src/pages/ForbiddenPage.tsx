@@ -9,12 +9,12 @@ export const ForbiddenPage: React.FC = () => {
     <div className="forbidden-page">
       <div className="forbidden-content">
         <ShieldAlert size={64} className="text-critical mb-6 mx-auto" />
-        <h1 className="forbidden-title">403 Forbidden</h1>
+        <h1 className="forbidden-title">403 Accès Refusé</h1>
         <p className="forbidden-description">
-          Your current role does not have the necessary security clearance to access this module.
+          Votre rôle actuel ne dispose pas des autorisations requises pour accéder à ce module médical.
         </p>
         <Link to="/">
-          <Button size="lg" variant="secondary">Return to Dashboard</Button>
+          <Button size="lg" variant="secondary">Retour à l'accueil</Button>
         </Link>
       </div>
     </div>

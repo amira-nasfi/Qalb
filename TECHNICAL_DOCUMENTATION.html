@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qalb قلب — Documentation Complète : Stack Technique & Fonctionnalités</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #e11d48;
+      --accent-light: #ffe4e6;
+      --success: #059669;
+      --success-light: #d1fae5;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --critical: #dc2626;
+      --critical-light: #fee2e2;
+      
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-sidebar: #0f172a;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-inverse: #f8fafc;
+      --border: #e2e8f0;
+      --border-focus: #38bdf8;
+      
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+      --radius: 12px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: 320px;
+      background: var(--bg-sidebar);
+      color: var(--text-inverse);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: white;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #e11d48, #0284c7);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: white;
+      box-shadow: 0 0 20px rgba(225, 29, 72, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-group-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.88rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #38bdf8;
+      transform: translateX(4px);
+    }
+
+    /* Main Content Area */
+    main.content {
+      margin-left: 320px;
+      flex: 1;
+      padding: 3rem 4rem;
+      max-width: 1400px;
+    }
+
+    header.doc-header {
+      margin-bottom: 3.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-primary { background: var(--primary-light); color: var(--primary-hover); }
+    .badge-success { background: var(--success-light); color: var(--success); }
+    .badge-critical { background: var(--critical-light); color: var(--critical); }
+    .badge-warning { background: var(--warning-light); color: var(--warning); }
+    .badge-dark { background: #0f172a; color: #f8fafc; }
+
+    .doc-header h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+      line-height: 1.15;
+    }
+
+    .doc-header p.lead {
+      font-size: 1.2rem;
+      color: #475569;
+      max-width: 900px;
+    }
+
+    /* Section Styling */
+    section {
+      margin-bottom: 4.5rem;
+      scroll-margin-top: 2rem;
+    }
+
+    h2.section-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 0.6rem;
+    }
+
+    h3.subsection-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 2rem 0 1rem 0;
+    }
+
+    p {
+      margin-bottom: 1.2rem;
+      color: #334155;
+    }
+
+    /* Cards & Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+
+    .card.highlight {
+      border-left: 4px solid var(--primary);
+    }
+
+    .card.critical {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 1.5rem 0 2rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    thead th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    code.inline {
+      background: #e2e8f0;
+      color: #0f172a;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.84em;
+    }
+
+    pre.code-block {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      margin: 1.25rem 0;
+      box-shadow: var(--shadow-md);
+      border: 1px solid #1e293b;
+    }
+
+    /* Callouts */
+    .callout {
+      padding: 1.25rem 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      border: 1px solid transparent;
+    }
+
+    .callout-info {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+
+    .callout-success {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .callout-warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .callout-danger {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .callout-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .callout-content p {
+      margin-bottom: 0.4rem;
+      color: inherit;
+    }
+
+    .callout-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Flow Chart / Diagram */
+    .diagram-container {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin: 1.5rem 0;
+      color: #94a3b8;
+      overflow-x: auto;
+    }
+
+    .diagram-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: #38bdf8;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      aside.sidebar {
+        display: none;
+      }
+      main.content {
+        margin-left: 0;
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <a href="#" class="brand">
+      <div class="brand-logo">قلب</div>
+      <div class="brand-text">
+        <h1>Qalb قلب</h1>
+        <p>Doc Technique & Métier</p>
+      </div>
+    </a>
+
+    <div>
+      <div class="nav-group-title">Vue d'ensemble</div>
+      <ul class="nav-links">
+        <li><a href="#intro">1. Présentation & Mission</a></li>
+        <li><a href="#architecture">2. Architecture Globale</a></li>
+        <li><a href="#flow">2.bis Flux Complet & Liaison FHIR</a></li>
+        <li><a href="#stack">3. Stack Technique & Choix</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-group-title">Moteur & Métier</div>
+      <ul class="nav-links">
+        <li><a href="#pipeline">4. Pipeline Traitement Signal</a></li>
+        <li><a href="#rules">5. Moteur de Règles Cliniques</a></li>
+        <li><a href="#workflow">6. Cycle de Vie du Rapport</a></li>
+        <li><a href="#doctor-portal">6.bis Portail Télé-Interprétation</a></li>
+        <li><a href="#fhir">7. Export HL7 FHIR R4</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-group-title">Sécurité & Gouvernance</div>
+      <ul class="nav-links">
+        <li><a href="#rbac">8. RBAC & Comptes Praticiens</a></li>
+        <li><a href="#audit">9. Traçabilité & Piste d'Audit</a></li>
+        <li><a href="#security">10. Sécurité & Dé-identification</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-group-title">Exploitation</div>
+      <ul class="nav-links">
+        <li><a href="#admin-kpi">11. Dashboard Admin & KPIs</a></li>
+        <li><a href="#email-sys">12. Système Email & MailHog</a></li>
+        <li><a href="#cicd">13. Pipeline CI/CD & Provenance</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- HEADER -->
+    <header class="doc-header">
+      <div class="badge-bar">
+        <span class="badge badge-dark">Projet Qalb (قلب)</span>
+        <span class="badge badge-primary">Future Health Connectathon · Défi 2.2</span>
+        <span class="badge badge-success">HL7 FHIR R4 Ready</span>
+        <span class="badge badge-warning">Zero-PII Compliance</span>
+        <span class="badge badge-critical">100% Explicable & Déterministe</span>
+      </div>
+      <h1>Dossier Technique & Fonctionnel Détaillé</h1>
+      <p class="lead">
+        Spécification exhaustive du stack technique, des pipelines de signal ECG, de la logique métier clinique, des choix d'architecture et des garanties de traçabilité médico-légale.
+      </p>
+    </header>
+
+    <!-- 1. PRÉSENTATION & MISSION -->
+    <section id="intro">
+      <h2 class="section-title">1. Présentation & Philosophie du Projet</h2>
+      <p>
+        <strong>Qalb قلب</strong> (de l'arabe : <em>cœur</em>) est une plateforme médicale distribuée conçue pour le dépistage et l'interprétation cardiologique de première intention en centre de soins primaire et en zones éloignées.
+      </p>
+
+      <div class="card highlight">
+        <div class="card-title">Motto Fondateur & Contrats Éthiques</div>
+        <p><strong>« Every heartbeat explained. Every decision traceable. Every physician in the loop. »</strong></p>
+        <p>Contrairement aux approches actuelles d'IA « boîte noire » générant des prédictions opaques sans justification mesurable, Qalb s'articule autour de 4 postulats rigoureux :</p>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+          <li><strong>Explicabilité Déterministe Totale :</strong> Chaque alerte clinique dérive directement d'une mesure millimétrique (intervalle PR, complexe QRS, intervalle QT/QTc, fréquence cardiaque) et d'un seuil clinique publié dans la littérature médicale (AHA/ACC, ESC, Rautaharju).</li>
+          <li><strong>Absence de PII Côté Serveur (Pseudonymisation stricte) :</strong> Le serveur ne stocke aucun nom, prénom, numéro de sécurité sociale ni adresse patient. Seul un UUID pseudonymisé est associé au signal.</li>
+          <li><strong>Validation Médicale Obligatoire & Incontournable :</strong> Aucun rapport ne peut être communiqué à l'équipe terrain ni exporté au format interopérable sans la signature électronique d'un médecin qualifié.</li>
+          <li><strong>Piste d'Audit Immuable :</strong> Chaque transition d'état, upload, calcul d'intervalle, signature ou consultation fait l'objet d'un log infalsifiable (append-only) avec empreinte SHA-256.</li>
+        </ul>
+      </div>
+
+      <h3 class="subsection-title">Les 3 Portails de la Plateforme</h3>
+      <div class="grid-3">
+        <div class="card critical">
+          <div class="card-title">🔐 Portail Administrateur (/admin)</div>
+          <p>Accès exclusif au rôle <code class="inline">ADMIN</code>.</p>
+          <ul style="margin-left: 1.2rem; font-size: 0.88rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+            <li>Journal d'audit immuable (toutes les actions de la plateforme)</li>
+            <li>Gestion des comptes <strong>Praticiens</strong> (ID 8 chiffres généré)</li>
+            <li>Gestion des comptes <strong>Médecins</strong> (N° de Licence RPPS saisi)</li>
+            <li>KPIs en temps réel (uploads, file d'attente, alertes critiques)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🏥 Portail Praticien (/upload, /dashboard)</div>
+          <p>Accès au rôle <code class="inline">FIELD_AGENT</code>.</p>
+          <ul style="margin-left: 1.2rem; font-size: 0.88rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+            <li>Saisie de l'identité patient (IPP, Nom, DDN, Sexe)</li>
+            <li>Upload du fichier ECG 12 dérivations</li>
+            <li>Suivi de l'analyse automatique (pipeline Celery)</li>
+            <li>Consultation des décisions du médecin :<br>
+              ✅ Rapport validé & signé<br>
+              🔄 Demande de réacquisition ECG (avec motif technique)<br>
+              🚨 Alerte urgence SAMU (avec consignes immédiates)
+            </li>
+          </ul>
+        </div>
+
+        <div class="card highlight">
+          <div class="card-title">🩺 Portail Médecin (/doctor, /review/:id)</div>
+          <p>Accès au rôle <code class="inline">PHYSICIAN</code>.</p>
+          <ul style="margin-left: 1.2rem; font-size: 0.88rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+            <li>File d'expertise triée par gravité (CRITIQUE → URGENT → ROUTINE)</li>
+            <li>Prise en charge d'un dossier (verrouillage collaboratif)</li>
+            <li>Inspection du tracé ECG (Dérivation II) + Synthèse automatique</li>
+            <li>3 issues décisionnelles : Valider & Signer / Réacquisition / Urgence SAMU</li>
+            <li>Export HL7 FHIR R4 (après signature uniquement)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ARCHITECTURE GLOBALE -->
+    <section id="architecture">
+      <h2 class="section-title">2. Architecture Système</h2>
+      <p>
+        Qalb est conçu selon une architecture découplée, conteneurisée et hautement résiliente, séparant les opérations synchrones d'affichage et d'API des opérations asynchrones intensives en calcul de signal.
+      </p>
+
+      <div class="diagram-container">
+        <pre class="diagram-box">
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 FRONTEND (React 19 + TypeScript + Vite)                 │
+│   LandingPage · UploadPage · PhysicianDashboard · ReviewPage (Waveforms) · Admin      │
+│   AuthContext (JWT Access/Refresh) · Fixed Live KPI Bar (Refresh auto 30s)             │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ HTTPS / JSON / application/fhir+json
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              BACKEND (Django 4.2 LTS + Django REST)                    │
+│  /api/auth/     /api/patients/     /api/ecg/     /api/reports/     /api/fhir/          │
+│  /api/admin/    /api/audit/        Role-Based Permissions (FieldAgent / Physician / Admin)│
+│                                                                                        │
+│   ┌────────────────────────┐   ┌────────────────────────┐   ┌───────────────────────┐  │
+│   │   Audit Middleware     │   │   Rule Engine (8 règles)│  │   FHIR R4 Builder     │  │
+│   │   (Log append-only)    │   │   (AHA / ESC / Rautah.)│   │   (Obs + DiagReport)  │  │
+│   └────────────────────────┘   └────────────────────────┘   └───────────────────────┘  │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │
+                     ┌──────────────────────┴──────────────────────┐
+                     ▼                                             ▼
+       ┌───────────────────────────┐                 ┌───────────────────────────┐
+       │   PostgreSQL 15 (DB)      │                 │     Redis 7 (Broker)      │
+       │   Tables relationnelles   │                 │     Files de messages     │
+       │   Champs chiffrés AES-256 │                 └─────────────┬─────────────┘
+       └───────────────────────────┘                               │
+                                                                   ▼
+                                                     ┌───────────────────────────┐
+                                                     │     Celery Worker         │
+                                                     │  Pipeline Traitement ECG  │
+                                                     │  (SciPy, NeuroKit2, WFDB) │
+                                                     └───────────────────────────┘
+        </pre>
+      </div>
+    </section>
+
+    <!-- 2.BIS FLUX COMPLET & LIAISON PATIENT-ECG FHIR R4 -->
+    <section id="flow">
+      <h2 class="section-title">2.bis Flux Clinique de Bout en Bout & Liaison Patient-ECG FHIR R4</h2>
+      <p>
+        Ce cycle de vie assure la traçabilité continue des données patient et du signal ECG, depuis l'authentification sécurisée jusqu'à la signature du médecin et l'exportation standardisée HL7 FHIR R4.
+      </p>
+
+      <div class="diagram-container">
+        <pre class="diagram-box">
+  [1. Connexion (Login)] ──────► Contrôle RBAC, JWT, Rate-limit & Redirection selon rôle
+           │
+           ▼
+  [2. Saisie Patient & Fichier ECG (/upload)]
+           │   ├── Données Patient (Nom, Prénom, DDN, Sexe, IPP) ──► Ressource FHIR Patient
+           │   └── Signal 12 dérivations (CSV/WFDB/EDF) + SHA-256  ──► ECGRecord (Liaison scellée)
+           ▼
+  [3. Pipeline Asynchrone Celery (Signal & Règles)]
+           │   ├── Filtrage Butterworth 0.5-40 Hz & Normalisation Z-score
+           │   ├── Délinéation morphologique P-QRS-T (NeuroKit2 Lead II / V5)
+           │   ├── Calculs d'intervalles (HR, PR, QRS, QT, QTc Bazett & Fridericia)
+           │   └── Moteur de règles déterministe (Seuils QTc adaptés au sexe du patient)
+           ▼
+  [4. Portail Médecin (/doctor)] ──── File d'expertise triée par gravité (CRITIQUE → URGENT → ROUTINE)
+           │   ├── KPIs : En attente · Mes dossiers en cours · Dossiers traités
+           │   └── Bouton « Prendre en charge » → statut IN_REVIEW (verrouillage collaboratif)
+           ▼
+  [5. Poste de Télé-Lecture (/review/:id)]
+           │   ├── Bannière Patient complète (Identité, Âge exact, Sexe)
+           │   ├── Bannière de prise en charge (Médecin responsable · N° Licence)
+           │   ├── Moniteur d'onde ECG dynamique (Recharts Lead II)
+           │   └── Synthèse clinique explicable & Saisie des conclusions médicales
+           │
+           ├── A. Valider & Signer ──────────────► statut SIGNED (export FHIR débloqué)
+           ├── B. Réacquisition + motif ─────────► statut RETAKE_REQUESTED (dispensaire notifié)
+           └── C. Urgence SAMU + consignes ──────► statut EMERGENCY_TRANSFER (irréversible)
+           ▼
+  [6. Export Bundle HL7 FHIR R4] ──► Bundle JSON R4 associant Patient, Observation & DiagnosticReport
+                                     Signataire : performer { reference: "Practitioner/<licence>" }
+        </pre>
+      </div>
+
+      <div class="grid-2">
+        <div class="card highlight">
+          <div class="card-title">Étape 1 & 2 : Authentification & Ingestion Conjointe</div>
+          <p>
+            L'opérateur s'authentifie avec contrôle anti-brute force. Sur la page d'acquisition (<code class="inline">/upload</code>), il renseigne simultanément l'identité du patient (IPP, Nom, Prénom, Date de naissance, Sexe) et le fichier ECG 12 dérivations.
+          </p>
+          <p style="font-size: 0.88rem; color: var(--text-muted);">
+            L'enregistrement ECG est immédiatement lié au patient en base de données (<code class="inline">ECGRecord.patient = patient</code>), et son intégrité est scellée par une empreinte SHA-256.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Étape 3 : Calcul & Seuils Spécifiques au Sexe</div>
+          <p>
+            Le worker Celery exécute le filtrage et la délinéation. Le moteur de règles exploite directement les données du patient (sexe biologique et date de naissance) pour ajuster les seuils cardiologiques (notamment le QTc selon <em>Rautaharju 1992</em>).
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Étape 4 & 5 : File d'Attente & Revue Clinique</div>
+          <p>
+            Le cardiologue accède à la file d'attente partagée (<code class="inline">/dashboard</code>). Chaque cas affiche le nom, prénom et IPP du patient. Sur la page d'examen (<code class="inline">/review/:id</code>), le praticien visualise le tracé interactif avec l'identité du patient en en-tête.
+          </p>
+        </div>
+
+        <div class="card highlight">
+          <div class="card-title">Étape 6 & 7 : Signature Médicale & Bundle FHIR R4</div>
+          <p>
+            La signature verrouille le statut (<code class="inline">SIGNED</code>), horodate l'acte et débloque l'export <strong>HL7 FHIR R4</strong>. Le bundle généré référence explicitement le patient dans chaque ressource clinique via <code class="inline">subject: {"reference": "Patient/&lt;uuid&gt;"}</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. STACK TECHNIQUE & JUSTIFICATION DES CHOIX -->
+    <section id="stack">
+      <h2 class="section-title">3. Stack Technique & Justification des Choix</h2>
+      <p>
+        Chaque technologie a été minutieusement sélectionnée pour répondre aux impératifs de conformité médicale, de performance en temps réel et de maintenabilité à long terme.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Composant</th>
+              <th>Technologie / Version</th>
+              <th>Rôle dans le projet</th>
+              <th>Justification du choix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Frontend Framework</strong></td>
+              <td><span class="badge badge-primary">React 19.2</span> + <span class="badge badge-dark">TypeScript 6.0</span></td>
+              <td>Interface utilisateur modulaire, typage strict des données médicales.</td>
+              <td>
+                Le typage statique TypeScript prévient toute erreur sur les structures complexes d'intervalles et de flags. React 19 offre des performances optimales de rendu pour le traçage des signaux ECG à haute fréquence.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Build Tool & Bundler</strong></td>
+              <td><span class="badge badge-primary">Vite 8.3</span></td>
+              <td>Compilation ultra-rapide, Hot Module Replacement (HMR).</td>
+              <td>Démarrage instantané en développement, tree-shaking poussé, et compilation de production optimisée en moins d'une seconde.</td>
+            </tr>
+            <tr>
+              <td><strong>Waveform Visualization</strong></td>
+              <td><span class="badge badge-primary">Recharts 3.10</span></td>
+              <td>Tracé dynamique multi-dérivations (12 leads) et affichage des marqueurs.</td>
+              <td>Rendu vectoriel SVG réactif permettant le sous-échantillonnage intelligent et l'inspection précise des pics R et des segments d'onde.</td>
+            </tr>
+            <tr>
+              <td><strong>Backend Framework</strong></td>
+              <td><span class="badge badge-success">Django 4.2 LTS</span> + <span class="badge badge-primary">DRF 3.15</span></td>
+              <td>API REST, modèle de sécurité, gestion des transactions ACID.</td>
+              <td>
+                Django est le standard industriel pour les applications critiques de santé : ORM mature, gestion robuste des migrations de schéma, protection native contre CSRF, XSS et SQL Injection.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Traitement Asynchrone</strong></td>
+              <td><span class="badge badge-warning">Celery 5.3</span> + <span class="badge badge-critical">Redis 7</span></td>
+              <td>Exécution asynchrone du pipeline de traitement du signal ECG.</td>
+              <td>
+                La délinéation du signal (filtrage, détection des ondes P-QRS-T) prend entre 500 ms et 2 s. L'asynchronisme garantit que les endpoints HTTP ne sont jamais bloqués et restent hautement disponibles.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Calcul Scientifique & Signal</strong></td>
+              <td><span class="badge badge-dark">NeuroKit2</span>, <span class="badge badge-primary">SciPy</span>, <span class="badge badge-primary">NumPy</span>, <span class="badge badge-success">WFDB</span>, <span class="badge badge-warning">MNE</span></td>
+              <td>Chargement multi-format (WFDB .mat/.hea, CSV, EDF), filtrage Butterworth et délinéation.</td>
+              <td>
+                Bibliothèques ouvertes et éprouvées par la recherche biomédicale. NeuroKit2 fournit une implémentation validée scientifiquement de l'algorithme Pan-Tompkins et des délinéateurs d'ondes.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Authentification</strong></td>
+              <td><span class="badge badge-dark">SimpleJWT 5.3</span></td>
+              <td>Tokens JWT Access (15 min) + Refresh (1 jour) avec blacklistage au logout.</td>
+              <td>Architecture d'authentification sans état (stateless) parfaitement adaptée aux architectures découplées, avec révocation immédiate en base de données lors de la déconnexion.</td>
+            </tr>
+            <tr>
+              <td><strong>Base de Données</strong></td>
+              <td><span class="badge badge-primary">PostgreSQL 15</span></td>
+              <td>Stockage relationnel principal, support JSONB pour snapshots d'audit.</td>
+              <td>Intégrité référentielle stricte, chiffrement au repos, isolation des transactions et indexation JSONB haute performance.</td>
+            </tr>
+            <tr>
+              <td><strong>Interception Mail Dev</strong></td>
+              <td><span class="badge badge-warning">MailHog 1.0</span></td>
+              <td>Serveur SMTP local (port 1025) et Webmail de test (port 8025).</td>
+              <td>Permet de tester l'envoi d'identifiants praticiens sans domaine tiers, sans quota et sans risque de fuite de mails en production.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. PIPELINE DE TRAITEMENT DU SIGNAL -->
+    <section id="pipeline">
+      <h2 class="section-title">4. Pipeline de Traitement du Signal ECG</h2>
+      <p>
+        Le pipeline transforme les signaux bruts en mesures millimétriques via 5 étapes déterministes séquentielles :
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Étape 1 : Ingestion Multi-Format & Hachage</div>
+          <p>Prise en charge native de 3 formats standardisés :</p>
+          <ul style="margin-left: 1.2rem; font-size: 0.9rem;">
+            <li><strong>WFDB (.mat + .hea) :</strong> Format standard PhysioNet (PTB-XL) via <code class="inline">wfdb.rdsamp()</code>.</li>
+            <li><strong>CSV :</strong> 12 colonnes de tensions en mV avec en-têtes de dérivations.</li>
+            <li><strong>EDF/EDF+ :</strong> Fichiers cliniques via <code class="inline">mne.io.read_raw_edf()</code>.</li>
+          </ul>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            Empreinte <strong>SHA-256</strong> calculée immédiatement sur les chunks du fichier brut pour garantir l'immutabilité et la non-répudiation.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Étape 2 : Pré-traitement & Filtrage</div>
+          <p>
+            Élimination des bruits physiologiques et des artefacts de mouvement :
+          </p>
+          <ul style="margin-left: 1.2rem; font-size: 0.9rem;">
+            <li><strong>Filtre passe-bande Butterworth 4ᵉ ordre (0.5 – 40 Hz) :</strong> Supprime la dérive de la ligne de base (&lt; 0.5 Hz) et les bruits myographiques haute fréquence (&gt; 40 Hz). Filtrage bidirectionnel à phase nulle (<code class="inline">scipy.signal.filtfilt</code>).</li>
+            <li><strong>Normalisation Z-score par dérivation :</strong> Stabilise la détection d'amplitude indépendamment des gains machine.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Étape 3 : Délinéation P-QRS-T & Fallback</div>
+          <p>
+            Identification systématique des 5 repères morphologiques par battement :
+          </p>
+          <p style="font-size: 0.9rem;"><code>P_onset</code> → <code>Q_peak</code> → <code>R_peak</code> → <code>S_peak</code> → <code>T_offset</code></p>
+          <ul style="margin-left: 1.2rem; font-size: 0.85rem;">
+            <li><strong>Dérivation primaire :</strong> Dérivation II (Lead II).</li>
+            <li><strong>Fallback intelligent :</strong> Bascule sur V5 si le taux de délinéation de Lead II est &lt; 50%.</li>
+            <li><strong>Mode partiel (Pan-Tompkins) :</strong> Si les deux dérivations échouent, le pipeline extrait au minimum les pics R pour assurer le calcul de la fréquence cardiaque.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Étape 4 : Calcul des Intervalles Cliniques</div>
+          <p>Calcul battement par battement, puis restitution de la <strong>Médiane ± Écart Interquartile (IQR)</strong> :</p>
+          <ul style="margin-left: 1.2rem; font-size: 0.85rem;">
+            <li><strong>Fréquence Cardiaque (HR) :</strong> <code class="inline">60 000 / median_RR (ms)</code></li>
+            <li><strong>Intervalle PR :</strong> <code class="inline">P_onset → Q_peak (ms)</code></li>
+            <li><strong>Durée QRS :</strong> <code class="inline">Q_peak → S_peak (ms)</code></li>
+            <li><strong>Intervalle QT :</strong> <code class="inline">Q_peak → T_offset (ms)</code></li>
+            <li><strong>QTc Bazett (1920) :</strong> <code class="inline">QT / √(RR_sec)</code></li>
+            <li><strong>QTc Fridericia (1920) :</strong> <code class="inline">QT / (RR_sec)^(1/3)</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MOTEUR DE RÈGLES CLINIQUES -->
+    <section id="rules">
+      <h2 class="section-title">5. Moteur de Règles Cliniques Déterministe</h2>
+      <p>
+        Les 8 règles cliniques évaluent les intervalles mesurés. Chaque alerte produite contient obligatoirement sa valeur numérique mesurée, son seuil de déclenchement et sa source bibliographique médicale formelle.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Code Règle</th>
+              <th>Condition Déclenchement</th>
+              <th>Gravité</th>
+              <th>Signification Clinique</th>
+              <th>Référence Médicale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="inline">BRADYCARDIA</code></td>
+              <td>Fréquence Cardiaque &lt; 60 bpm</td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td>Rythme anormalement lent</td>
+              <td>AHA/ACC 2009 ECG Standardization</td>
+            </tr>
+            <tr>
+              <td><code class="inline">TACHYCARDIA</code></td>
+              <td>Fréquence Cardiaque &gt; 100 bpm</td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td>Rythme anormalement rapide</td>
+              <td>AHA/ACC 2009 ECG Standardization</td>
+            </tr>
+            <tr>
+              <td><code class="inline">SHORT_PR</code></td>
+              <td>Intervalle PR &lt; 120 ms</td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td>Suspicion de pré-excitation ventriculaire (ex: WPW)</td>
+              <td>AHA/ACC 2009 Guidelines</td>
+            </tr>
+            <tr>
+              <td><code class="inline">LONG_PR</code></td>
+              <td>Intervalle PR &gt; 200 ms</td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td>Suspicion de bloc auriculo-ventriculaire du 1er degré</td>
+              <td>AHA/ACC 2009 Guidelines</td>
+            </tr>
+            <tr>
+              <td><code class="inline">WIDE_QRS</code></td>
+              <td>Durée QRS &gt; 120 ms</td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td>Bloc de branche ou conduction intra-ventriculaire altérée</td>
+              <td>AHA/ACC 2009 Guidelines</td>
+            </tr>
+            <tr>
+              <td><code class="inline">QTC_MODERATE</code></td>
+              <td>QTc ≥ 450 ms (Homme) / ≥ 460 ms (Femme)</td>
+              <td><span class="badge badge-warning">WARNING</span></td>
+              <td>Allongement modéré du QT (ajusté selon le sexe biologique)</td>
+              <td>Rautaharju et al., JACC 1992</td>
+            </tr>
+            <tr>
+              <td><code class="inline">QTC_CRITICAL</code></td>
+              <td>QTc ≥ 500 ms</td>
+              <td><span class="badge badge-critical">CRITICAL</span></td>
+              <td>Risque majeur de Torsades de Pointes et mort subite</td>
+              <td>ESC 2022 Ventricular Arrhythmias Guidelines</td>
+            </tr>
+            <tr>
+              <td><code class="inline">NORMAL_SINUS</code></td>
+              <td>Toutes les métriques dans les plages physiologiques</td>
+              <td><span class="badge badge-success">INFO</span></td>
+              <td>Tracé normal sans anomalie apparente</td>
+              <td>Concordance complète AHA/ACC</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. CYCLE DE VIE DU RAPPORT -->
+    <section id="workflow">
+      <h2 class="section-title">6. Cycle de Vie du Rapport — Machine à États Étendue</h2>
+      <p>
+        Le statut d'un rapport ECG suit une machine à états stricte et non-bypasable. Avec le portail de télé-interprétation, la machine comprend désormais <strong>5 statuts distincts</strong> correspondant aux différentes issues cliniques possibles.
+      </p>
+
+      <div class="diagram-container" style="margin-bottom: 1.5rem;">
+        <pre class="diagram-box">
+[PENDING_REVIEW]
+      │  POST /api/reports/{id}/claim/  (PHYSICIAN only)
+      ▼
+[IN_REVIEW]  ← Médecin responsable verrouillé (claimed_by + claimed_at)
+      │
+      ├── POST /api/reports/{id}/sign/        → [SIGNED]              ← Export FHIR débloqué
+      ├── POST /api/reports/{id}/retake/      → [RETAKE_REQUESTED]    ← Dispensaire notifié
+      └── POST /api/reports/{id}/emergency/   → [EMERGENCY_TRANSFER]  ← Alerte SAMU immédiate
+        </pre>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">① PENDING_REVIEW</div>
+          <p>Généré automatiquement dès la fin du traitement Celery.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">L'équipe terrain ne peut pas consulter les interprétations cliniques préliminaires (sécurité 403).</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">② IN_REVIEW</div>
+          <p>Le médecin a pris en charge le dossier via <code class="inline">POST /claim/</code>.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Verrouillage collaboratif : si un autre médecin tente de prendre en charge, il reçoit un HTTP 409 Conflict.</p>
+        </div>
+
+        <div class="card highlight">
+          <div class="card-title">③ SIGNED</div>
+          <p>Signature électronique irréversible. Rapport verrouillé en lecture seule.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Débloque l'export HL7 FHIR R4 avec le numéro de licence du signataire dans le champ <code class="inline">performer</code>.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">④ RETAKE_REQUESTED</div>
+          <p>Le médecin a identifié un tracé inexploitable (artéfacts, inversion d'électrodes…).</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Un motif technique horodaté (<code class="inline">retake_reason</code>) est transmis au dispensaire pour réenregistrement.</p>
+        </div>
+
+        <div class="card critical">
+          <div class="card-title">⑤ EMERGENCY_TRANSFER</div>
+          <p>Le médecin a détecté une urgence vitale absolue et déclenche l'alerte SAMU.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Les consignes immédiates (<code class="inline">emergency_notes</code>) sont transmises au dispensaire. Le dossier est verrouillé et l'action est irréversible. Une entrée d'audit de criticité maximale est horodatée.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6.BIS PORTAIL MÉDECIN DE TÉLÉ-INTERPRÉTATION -->
+    <section id="doctor-portal">
+      <h2 class="section-title">6.bis Portail Médecin de Télé-Interprétation Cardiologique</h2>
+      <p>
+        Le portail de télé-interprétation (<code class="inline">/doctor</code>) permet aux médecins distants d'assumer la responsabilité médicale des acquisitions ECG effectuées en dispensaire, sans déplacement physique.
+      </p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">🩺</div>
+        <div class="callout-content">
+          <p><strong>Principe de triage automatique :</strong> La file d'expertise est triée par gravité décroissante (CRITIQUE → URGENT → ROUTINE) puis par ancienneté. Les cas CRITIQUE apparaissent toujours en tête de liste avec un code couleur rouge, garantissant une prise en charge prioritaire.</p>
+        </div>
+      </div>
+
+      <h3 class="subsection-title">Tableau de bord Médecin (/doctor) — Composants</h3>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">KPI : En attente</div>
+          <p>Nombre de dossiers au statut <code class="inline">PENDING_REVIEW</code>, disponibles pour prise en charge.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">KPI : Mes dossiers en cours</div>
+          <p>Dossiers <code class="inline">IN_REVIEW</code> dont le médecin connecté est le <code class="inline">claimed_by</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">KPI : Dossiers traités</div>
+          <p>Dossiers au statut terminal : <code class="inline">SIGNED</code>, <code class="inline">RETAKE_REQUESTED</code>, ou <code class="inline">EMERGENCY_TRANSFER</code>.</p>
+        </div>
+      </div>
+
+      <h3 class="subsection-title">Poste de Télé-Lecture (/review/:id) — Panneau Décisionnel</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Endpoint Backend</th>
+              <th>Statut Résultant</th>
+              <th>Champs Renseignés</th>
+              <th>Effet Immédiat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🟢 <strong>Prendre en charge</strong></td>
+              <td><code class="inline">POST /api/reports/{id}/claim/</code></td>
+              <td><span class="badge badge-primary">IN_REVIEW</span></td>
+              <td><code class="inline">claimed_by</code>, <code class="inline">claimed_at</code></td>
+              <td>Verrouillage collaboratif. 409 Conflict si autre médecin.</td>
+            </tr>
+            <tr>
+              <td>✅ <strong>Valider &amp; Signer</strong></td>
+              <td><code class="inline">POST /api/reports/{id}/sign/</code></td>
+              <td><span class="badge badge-success">SIGNED</span></td>
+              <td><code class="inline">signed_by</code>, <code class="inline">signed_at</code>, <code class="inline">physician_notes</code></td>
+              <td>Export FHIR R4 débloqué. Rapport verrouillé en lecture seule.</td>
+            </tr>
+            <tr>
+              <td>🔄 <strong>Réacquisition ECG</strong></td>
+              <td><code class="inline">POST /api/reports/{id}/retake/</code></td>
+              <td><span class="badge badge-warning">RETAKE_REQUESTED</span></td>
+              <td><code class="inline">retake_reason</code> (motif technique obligatoire)</td>
+              <td>Dispensaire informé du problème technique avec instructions de réenregistrement.</td>
+            </tr>
+            <tr>
+              <td>🚨 <strong>Urgence SAMU</strong></td>
+              <td><code class="inline">POST /api/reports/{id}/emergency/</code></td>
+              <td><span class="badge badge-critical">EMERGENCY_TRANSFER</span></td>
+              <td><code class="inline">emergency_notes</code> (consignes immédiates obligatoires), <code class="inline">signed_by</code>, <code class="inline">signed_at</code></td>
+              <td>Alerte vitale transmise instantanément. Dossier verrouillé. Action irréversible. Entrée audit maximale.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="subsection-title">Modèle de Données — Champs de Télé-Interprétation</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Champ</th>
+              <th>Type Django</th>
+              <th>Rôle Clinique</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="inline">claimed_by</code></td>
+              <td>ForeignKey(User, null=True)</td>
+              <td>Médecin ayant pris en charge le dossier (verrouillage collaboratif).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">claimed_at</code></td>
+              <td>DateTimeField(null=True)</td>
+              <td>Horodatage de la prise en charge (traçabilité médico-légale).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">retake_reason</code></td>
+              <td>TextField(blank=True)</td>
+              <td>Motif technique de rejet du tracé (artéfacts, inversion d'électrodes, bruit…).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">emergency_notes</code></td>
+              <td>TextField(blank=True)</td>
+              <td>Consignes immédiates transmises au dispensaire en cas d'urgence vitale absolue.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-danger">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <p><strong>Sécurité des Actions Irréversibles :</strong></p>
+          <p>L'action <em>Urgence SAMU</em> est protégée par une modale de confirmation avec champ de saisie des consignes obligatoire. Elle ne peut être déclenchée qu'une fois, par un médecin authentifié (<code class="inline">IsPhysician</code>), et produit immédiatement une entrée d'audit immuable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. EXPORT HL7 FHIR R4 -->
+    <section id="fhir">
+      <h2 class="section-title">7. Export Standardisé HL7 FHIR R4</h2>
+      <p>
+        Qalb est conçu nativement pour l'interopérabilité hospitalière (Dossier Patient Informatisé, PACS, serveurs FHIR régionaux/nationaux).
+      </p>
+
+      <div class="card">
+        <div class="card-title">Spécification du Bundle FHIR R4</div>
+        <p><strong>Endpoint :</strong> <code class="inline">GET /api/fhir/reports/{id}/</code></p>
+        <p><strong>Content-Type :</strong> <code class="inline">application/fhir+json</code></p>
+        <p><strong>Contrôles d'accès :</strong> Authentification requise, rôle Médecin ou Admin, statut de rapport obligatoirement <code class="inline">SIGNED</code>.</p>
+        
+        <pre class="code-block">{
+  "resourceType": "Bundle",
+  "type": "document",
+  "timestamp": "2026-09-17T11:00:00Z",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "code": {
+          "coding": [{ "system": "http://loinc.org", "code": "11524-6", "display": "ECG Study" }]
+        },
+        "component": [
+          {
+            "code": { "coding": [{ "system": "http://loinc.org", "code": "8867-4", "display": "Heart rate" }] },
+            "valueQuantity": { "value": 72.0, "unit": "/min", "system": "http://unitsofmeasure.org" }
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "status": "final",
+        "conclusion": "Tracé sinusal régulier avec QTc normal.",
+        "extension": [
+          {
+            "url": "https://qalb.health/fhir/extensions/ecg-flag",
+            "extension": [
+              { "url": "code", "valueString": "NORMAL_SINUS" },
+              { "url": "citation", "valueString": "AHA/ACC 2009 Guidelines" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}</pre>
+      </div>
+    </section>
+
+    <!-- 8. RBAC & GESTION DES PRATICIENS -->
+    <section id="rbac">
+      <h2 class="section-title">8. Rôles (RBAC) & Gestion des Comptes</h2>
+      <p>
+        La plateforme applique une politique stricte de séparation des privilèges basée sur 3 rôles distincts. Les comptes <strong>Praticiens</strong> et les comptes <strong>Médecins</strong> sont créés séparément dans le dashboard admin, avec des workflows distincts.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">FIELD_AGENT — Praticien de Terrain</div>
+          <p><strong>Portail :</strong> <code class="inline">/upload</code>, <code class="inline">/dashboard</code></p>
+          <p>Réalise les acquisitions ECG au dispensaire, renseigne l'identité du patient, suit l'analyse automatique et consulte les décisions finales du médecin (rapport validé, demande de réacquisition, alerte SAMU).</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Visibilité des rapports :</strong> <code class="inline">SIGNED</code> · <code class="inline">RETAKE_REQUESTED</code> · <code class="inline">EMERGENCY_TRANSFER</code></p>
+        </div>
+
+        <div class="card highlight">
+          <div class="card-title">PHYSICIAN — Médecin Télé-Expert</div>
+          <p><strong>Portail :</strong> <code class="inline">/doctor</code>, <code class="inline">/review/:id</code></p>
+          <p>Consulte la file d'expertise triée par gravité, prend en charge les dossiers, inspecte l'analyse automatique et les tracés ECG, puis rend son avis médical (signature, réacquisition, urgence SAMU).</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Visibilité des rapports :</strong> Tous les statuts (file complète)</p>
+        </div>
+
+        <div class="card critical">
+          <div class="card-title">ADMIN — Administrateur</div>
+          <p><strong>Portail :</strong> <code class="inline">/admin</code>, <code class="inline">/admin/users</code></p>
+          <p>Gère les comptes des Praticiens <em>et</em> des Médecins, suit les indicateurs opérationnels en temps réel (KPIs) et audite l'ensemble des activités via le journal immuable.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Visibilité des rapports :</strong> Tous les statuts</p>
+        </div>
+      </div>
+
+      <div class="card highlight" style="margin-top: 1.5rem;">
+        <div class="card-title">Workflow de Création des Comptes — Agent de Terrain (FIELD_AGENT)</div>
+        <ol style="margin-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.92rem;">
+          <li><strong>Création / Invitation par l'Admin :</strong> L'administrateur renseigne nom, prénom, date de naissance et email.</li>
+          <li><strong>Génération Automatisée des Identifiants :</strong> Le système crée un <em>username</em> unique à 8 chiffres et un mot de passe temporaire cryptographiquement robuste (12 caractères, majuscules, chiffres, symboles).</li>
+          <li><strong>Notification Email Sécurisée :</strong> Les accès sont transmis automatiquement par courriel via SMTP (intercepté par MailHog en environnement de développement).</li>
+          <li><strong>Renouvellement Forcé au Premier Login :</strong> Le compte est créé avec le flag <code class="inline">force_password_change = True</code>. À la première connexion, le praticien est redirigé vers l'interface dédiée et doit obligatoirement définir un mot de passe personnel d'au moins 12 caractères avant d'accéder aux dossiers.</li>
+          <li><strong>Suspension Non-Destructive :</strong> Le bouton <em>Suspendre</em> active <code class="inline">is_suspended = True</code>, bloquant immédiatement la connexion sans supprimer les données ni corrompre l'historique d'audit légal.</li>
+        </ol>
+      </div>
+
+      <div class="card critical" style="margin-top: 1.5rem;">
+        <div class="card-title">Workflow de Création des Comptes — Médecin Télé-Expert (PHYSICIAN)</div>
+        <p style="font-size: 0.92rem; margin-bottom: 1rem;">
+          La création d'un compte médecin suit un processus distinct : le <strong>Numéro de Licence Médicale / Numéro d'Ordre (RPPS)</strong> est saisi manuellement par l'administrateur et devient directement l'identifiant de connexion (<code class="inline">username</code>) du médecin.
+        </p>
+        <ol style="margin-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.92rem;">
+          <li><strong>Saisie Admin (Dashboard /admin/users) :</strong> L'administrateur renseigne nom, prénom, date de naissance, email professionnel et le <em>Numéro de Licence Médicale</em> (ex : <code class="inline">LIC-TN-88219</code>).</li>
+          <li><strong>Username = Numéro de Licence :</strong> Le numéro de licence devient le <code class="inline">username</code> unique du compte. Aucun identifiant aléatoire n'est généré. La validation d'unicité est appliquée côté API (<code class="inline">UserInviteSerializer</code>).</li>
+          <li><strong>Mot de Passe Temporaire :</strong> Le système génère un mot de passe robuste (12 caractères, complexité complète).</li>
+          <li><strong>Email de Bienvenue :</strong> Le médecin reçoit un email contenant son <em>identifiant de connexion</em> (son numéro de licence) et son mot de passe temporaire.</li>
+          <li><strong>Première Connexion Obligatoire :</strong> Le flag <code class="inline">force_password_change = True</code> oblige le médecin à définir son propre mot de passe avant d'accéder au portail de télé-interprétation.</li>
+          <li><strong>Traçabilité Légale :</strong> Le numéro de licence est présent dans chaque export FHIR R4 signé, dans le champ <code class="inline">performer.reference</code> du <code class="inline">DiagnosticReport</code>.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 9. AUDIT & TRACABILITÉ -->
+    <section id="audit">
+      <h2 class="section-title">9. Traçabilité & Journal d'Audit Immuable</h2>
+      <p>
+        Le modèle <code class="inline">AuditLog</code> est soumis au principe <strong>append-only</strong> : les opérations <code class="inline">UPDATE</code> et <code class="inline">DELETE</code> sont interdites en base de données et dans les couches d'API.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Champ d'Audit</th>
+              <th>Type de Donnée</th>
+              <th>Utilité Médico-Légale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="inline">timestamp</code></td>
+              <td>DateTimeField (Indexé)</td>
+              <td>Date et heure UTC précises à la milliseconde de l'événement.</td>
+            </tr>
+            <tr>
+              <td><code class="inline">actor / actor_label</code></td>
+              <td>ForeignKey(User) + String</td>
+              <td>Identité du praticien ou label <code class="inline">SYSTEM</code> pour les calculs automatiques.</td>
+            </tr>
+            <tr>
+              <td><code class="inline">action</code></td>
+              <td>CharField (Enum)</td>
+              <td>Typologie d'action (CREATE, UPDATE, SIGN, PROCESS_DONE, EXPORT_FHIR, LOGIN, SUSPEND...).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">target_type / target_id</code></td>
+              <td>CharField / String</td>
+              <td>Référence à l'entité concernée (Patient, ECGRecord, Report, User).</td>
+            </tr>
+            <tr>
+              <td><code class="inline">old_value / new_value</code></td>
+              <td>JSONField</td>
+              <td>Snapshots différentiels de l'état des données avant et après la modification.</td>
+            </tr>
+            <tr>
+              <td><code class="inline">ip_hash</code></td>
+              <td>CharField(64)</td>
+              <td>Empreinte <strong>SHA-256</strong> de l'adresse IP cliente (garantie RGPD : l'adresse brute n'est jamais stockée).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 10. SÉCURITÉ & PROTECTION DES DONNÉES -->
+    <section id="security">
+      <h2 class="section-title">10. Sécurité, Confidentialité & Zero-PII</h2>
+      
+      <div class="callout callout-info">
+        <div class="callout-icon">🛡️</div>
+        <div class="callout-content">
+          <p><strong>Politique Zero-PII (Personally Identifiable Information) :</strong></p>
+          <p>
+            Le dossier patient ne comporte que l'année de naissance (<code class="inline">dob_year</code>) et le sexe biologique (<code class="inline">sex</code>). Le sexe est indispensable pour appliquer le seuil QTc adapté (Rautaharju et al., 1992 : 450 ms chez l'homme, 460 ms chez la femme). La correspondance avec l'identité réelle du patient reste conservée exclusivement au niveau local du dispensaire médical.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Chiffrement au Repos (AES-256)</div>
+          <p>
+            Les champs sensibles et les fichiers de signaux ECG stockés sur le volume de médias bénéficient d'un chiffrement AES-256 via <code class="inline">django-encrypted-model-fields</code>.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Protection Anti-Brute Force</div>
+          <p>
+            L'endpoint d'authentification <code class="inline">/api/auth/login/</code> est protégé par un limiteur de débit strict (<code class="inline">django-ratelimit</code>) bridé à <strong>5 tentatives par période de 10 minutes</strong> par adresse IP.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. DASHBOARD ADMIN & KPIS -->
+    <section id="admin-kpi">
+      <h2 class="section-title">11. Dashboard Administrateur & Métriques Live (KPIs)</h2>
+      <p>
+        Accessible à l'URL <code class="inline">/admin</code> pour les utilisateurs au rôle <code class="inline">ADMIN</code>, le tableau de bord offre une visibilité instantanée sur les flux d'activité grâce à un polling automatique toutes les 30 secondes :
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Uploads Aujourd'hui</div>
+          <p style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">Flux Quotidien</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Nombre total d'enregistrements ECG déposés depuis minuit.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Revues en Attente</div>
+          <p style="font-size: 1.8rem; font-weight: 800; color: var(--warning);">File d'Attente</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Dossiers requérant l'évaluation et la validation d'un médecin.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Alertes CRITICAL Actives</div>
+          <p style="font-size: 1.8rem; font-weight: 800; color: var(--critical);">Urgence Cardiaque</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Dossiers en attente présentant une anomalie critique (ex: QTc ≥ 500 ms).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. SYSTÈME EMAIL & MAILHOG -->
+    <section id="email-sys">
+      <h2 class="section-title">12. Système de Messagerie & MailHog</h2>
+      <p>
+        Pour garantir une configuration zéro dépendance externe et éviter toute exigence de nom de domaine tiers en cours de développement, le système intègre <strong>MailHog</strong> :
+      </p>
+      
+      <div class="callout callout-success">
+        <div class="callout-icon">✉️</div>
+        <div class="callout-content">
+          <p><strong>Serveur SMTP Local & Visualisation Web :</strong></p>
+          <p>• <strong>Écoute SMTP :</strong> <code class="inline">localhost:1025</code> (Django expédie les emails directement vers ce port)</p>
+          <p>• <strong>Interface Web MailHog :</strong> <code class="inline">http://localhost:8025</code> (permet de visualiser et tester la réception des emails de bienvenue et des identifiants temporaires en direct)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. CI/CD & GOUVERNANCE -->
+    <section id="cicd">
+      <h2 class="section-title">13. Pipeline d'Intégration Continue (CI/CD) & Provenance</h2>
+      <p>
+        Toute pull request ou commit sur la branche <code class="inline">main</code> est assujetti à 6 vérifications obligatoires dans GitHub Actions :
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom du Job</th>
+              <th>Outil d'Exécution</th>
+              <th>Objectif de la Vérification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>lint-backend</strong></td>
+              <td><code class="inline">flake8</code></td>
+              <td>Vérification de la conformité PEP8 et de la qualité du code Python.</td>
+            </tr>
+            <tr>
+              <td><strong>lint-frontend</strong></td>
+              <td><code class="inline">oxlint</code></td>
+              <td>Analyse statique ultra-rapide des fichiers TypeScript et React.</td>
+            </tr>
+            <tr>
+              <td><strong>test-backend</strong></td>
+              <td><code class="inline">pytest --cov</code></td>
+              <td>Exécution de la suite de tests avec un seuil de couverture minimal strict de 65%.</td>
+            </tr>
+            <tr>
+              <td><strong>build-frontend</strong></td>
+              <td><code class="inline">tsc -b && vite build</code></td>
+              <td>Contrôle strict des types TypeScript et compilation des assets de production.</td>
+            </tr>
+            <tr>
+              <td><strong>docker-check</strong></td>
+              <td><code class="inline">docker-compose</code></td>
+              <td>Validation de la cohérence des conteneurs et de l'intégrité des migrations.</td>
+            </tr>
+            <tr>
+              <td><strong>provenance-guard</strong></td>
+              <td>Script de contrôle</td>
+              <td>Échec immédiat si la feuille de traçabilité des jeux de données réels (<code class="inline">DATASET_PROVENANCE.md</code>) est altérée ou absente.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">📚</div>
+        <div class="callout-content">
+          <p><strong>Datasets Publics Réels Référencés :</strong></p>
+          <p>• <strong>PTB-XL :</strong> DOI 10.13026/cmsy-5161 (Tests du pipeline, signaux de démonstration)</p>
+          <p>• <strong>QT Database :</strong> DOI 10.13026/C24K53 (Validation de la précision du calcul QTc)</p>
+          <p>• <strong>LUDB :</strong> DOI 10.13026/qwde-4j96 (Évaluation du délinéateur morphologique)</p>
+          <p><em>Aucun signal synthétique ou halluciné n'est employé comme preuve clinique.</em></p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

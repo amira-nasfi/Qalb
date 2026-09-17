@@ -1,8 +1,15 @@
 export interface Patient {
   pseudo_id: string;
-  dob_year: number;
-  sex: "M" | "F" | "O";
-  facility_id: string;
+  patient_identifier?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  birth_date?: string;
+  dob_year?: number;
+  age?: number;
+  sex?: "M" | "F" | "O";
+  gender?: "male" | "female" | "other" | "unknown";
+  facility_id?: string;
   created_at?: string;
 }
 
@@ -49,21 +56,40 @@ export interface ProcessingResult {
   processed_at: string;
 }
 
+export interface PhysicianSummary {
+  id: number;
+  first_name: string;
+  last_name: string;
+  username: string;
+}
+
 export interface Report {
   id: number;
   job_id: number;
   pseudo_id: string;
+  patient?: Patient;
+  patient_identifier?: string;
+  patient_name?: string;
+  patient_age?: number;
+  patient_gender?: string;
   result: ProcessingResult;
   draft_text: string;
   physician_notes: string;
   severity: "ROUTINE" | "URGENT" | "CRITICAL";
-  status: "PENDING_REVIEW" | "REVIEWED" | "SIGNED";
-  signed_by_user?: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    username: string;
-  };
+  status:
+    | "PENDING_REVIEW"
+    | "IN_REVIEW"
+    | "SIGNED"
+    | "RETAKE_REQUESTED"
+    | "EMERGENCY_TRANSFER";
+  // Tele-interpretation: claiming
+  claimed_by_user?: PhysicianSummary;
+  claimed_at?: string;
+  // Tele-interpretation: retake & emergency
+  retake_reason?: string;
+  emergency_notes?: string;
+  // Signing
+  signed_by_user?: PhysicianSummary;
   signed_at?: string;
   created_at: string;
   updated_at: string;
