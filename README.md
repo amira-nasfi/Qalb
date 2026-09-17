@@ -68,8 +68,8 @@ A remote specialist (tele-expert cardiologist) accesses a prioritized real-time 
 │                                                                        │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
 │  │                   Deterministic ECG Engine                       │  │
-│  │  Quality Check → Pan-Tompkins & NeuroKit2 Delineation →          │  │
-│  │  Intervals (RR, PR, QRS, QT, QTc) → Rule Engine & ICD-10         │  │
+│  │  Quality Check → NeuroKit2 DWT Delineation (II/V1/V5) →          │  │
+│  │  Intervals (RR, PR, QRS, QT, QTc, pNN50, RMSSD) → Rule Engine   │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
 │                                                                        │
 │  ┌─────────────────────┐  ┌─────────────────────┐  ┌────────────────┐  │
@@ -114,39 +114,53 @@ All test accounts share the same default password: `Password123!`
 
 ## Signal Processing Pipeline & Engine
 
-Raw ECG files (`.csv`, `.dat`/`.hea`, `.edf`) are processed deterministically:
+Raw ECG files (`.csv`, `.dat`/`.hea`, `.edf`) are processed synchronously by the `ecg_analysis` library (`backend/ecg_analysis/`) on every upload. The pipeline runs in a single function call — `analyze_to_report()` — and produces a fully JSON-serialisable result in under 1 000 ms.
 
-1. **Format Loading & Calibration:** Multi-lead parsing with sampling frequency verification (`fs`).
-2. **Quality & Receivability (`quality.py`):**
-   - Flatline detection, baseline wander checking, and high-frequency noise ratio.
-   - Lead check: ensures essential leads (`I`, `II`, `V1`, `V5`) are valid.
-   - Automatic rejection (`REJECTED`) if signal is non-receivable.
-3. **Delineation (`delineation.py`):**
-   - Primary evaluation on Lead II using NeuroKit2 wavelet/derivative delineation.
-   - Detection of P-onset, P-peak, Q-peak, R-peak, S-peak, T-peak, and T-offset.
-   - Fallback to Lead V5 and Pan-Tompkins QRS detection if Lead II is degraded.
-4. **Clinical Interval Measurement (`intervals.py`):**
+1. **Format Loading (`readers.py`):** Multi-format ingestion via `read_any()`. Supports WFDB (`.dat`/`.hea`) via `wfdb.rdsamp()`, CSV with lead-name headers, and EDF via `pyedflib`. Amplitude is normalized to millivolts; lead order is remapped to the canonical AHA/ACC 12-lead sequence.
+2. **Preprocessing (`pipeline.py` — `preprocess()`):**
+   - **Resampling** to 500 Hz (polyphase) if the source `fs` differs.
+   - **Notch filters** at 50 Hz and 100 Hz (IIR, Q=30) to remove powerline interference.
+   - **2-stage median baseline correction** (200 ms then 600 ms windows) — preserves ST segment morphology unlike a high-pass filter.
+   - **150 Hz 4th-order Butterworth lowpass** applied zero-phase.
+3. **Signal Quality Assessment (`assess_quality()`):**
+   - Per-lead checks: flatline detection (peak-to-peak < 0.05 mV), amplitude range, baseline wander ratio, powerline noise ratio, and signal kurtosis.
+   - Automatic rejection (`REJECTED` triage, `escalated=True`) if signal quality is unacceptable.
+4. **Beat Detection & PQRST Segmentation (`detect_beats()`, `segment()`):**
+   - R-peak detection via NeuroKit2 `ecg_peaks()` on Lead II.
+   - DWT-based delineation via `ecg_delineate()` run on anchor leads **II, V1, V5**.
+   - Calibration offsets applied (measured against 191 LUDB annotated records): P_on (+12.8 ms), P_off (−18.3 ms), QRS_on (−6.9 ms), QRS_off (−4.4 ms), T_off (−19.6 ms).
+5. **Clinical Interval Measurement (`measure()`):**
    - Heart Rate (HR bpm) from median RR interval.
-   - PR interval ($P_{onset} \to Q_{peak}$).
-   - QRS duration ($Q_{peak} \to S_{peak}$).
-   - QT interval ($Q_{peak} \to T_{offset}$).
-   - Corrected QT (QTc) via **Bazett** ($QT / \sqrt{RR}$) and **Fridericia** ($QT / \sqrt[3]{RR}$).
-   - Heart Rate Variability metrics: $pNN50$ and $RMSSD$.
+   - PR interval ($P_{onset} \to QRS_{onset}$), QRS duration, QT interval — all as per-beat medians.
+   - Corrected QT via **Bazett** ($QT / \sqrt{RR}$) and **Fridericia** ($QT / RR^{1/3}$).
+   - Heart Rate Variability: $pNN50$ and $RMSSD$.
+   - Ectopic beat count (RR deviation > 20% from median).
 
 ---
 
 ## Clinical Rule Engine & ICD-10 Codification
 
+The `analyse()` function in `ecg_analysis/pipeline.py` applies deterministic, fully cited rules. Every finding exposes `code`, `finding`, `severity`, `measured`, `threshold`, `meaning`, and a `diagnosis` block with ICD-10 / CIM-10 code.
+
 | Finding Code | Condition | Severity | ICD-10 / CIM-10 | Clinical Source |
 |--------------|-----------|----------|-----------------|-----------------|
-| `BRADYCARDIA` | HR < 60 bpm | URGENT (ORANGE) | `R00.1` | AHA/ACC 2009 Standardisation |
-| `TACHYCARDIA` | HR > 100 bpm | URGENT (ORANGE) | `R00.0` | AHA/ACC 2009 Standardisation |
-| `SHORT_PR` | PR < 120 ms | ROUTINE (GREEN) | `I45.6` | Wolff-Parkinson-White / Pre-excitation |
-| `LONG_PR` | PR > 200 ms | URGENT (ORANGE) | `I44.0` | Bloc AV du 1er degré (BAV 1) |
-| `WIDE_QRS` | QRS ≥ 120 ms | URGENT (ORANGE) | `I45.9` | Troubles de conduction intraventriculaire |
-| `QTC_MODERATE` | QTc ≥ 450 ms (♂) / ≥ 460 ms (♀) | URGENT (ORANGE) | `I45.81` | Rautaharju et al., JACC 1992 |
-| `QTC_CRITICAL` | QTc ≥ 500 ms | CRITICAL (RED) | `I45.81` | ESC 2022 Ventricular Arrhythmias |
-| `NORMAL_SINUS`| All measurements within normal limits | ROUTINE (GREEN) | `Z01.810` | AHA/ACC Guidelines |
+| `PACED` | Paced rhythm flag supplied by device | ORANGE | `Z95.0` | AHA/ACC 2022 |
+| `IRREG` | pNN50 > 0.35 → AF not excluded | ORANGE | `I48.91` | Sensitivity 100%, specificity 79% on 200 records |
+| `SINUS` | pNN50 ≤ 0.35 → organised sinus activity | GREEN | — | AHA/ACC 2009 |
+| `BRADY` | HR < 60 bpm | GREEN / ORANGE | `R00.1` | AHA/ACC 2009 Standardisation |
+| `TACHY` | HR > 90 bpm | ORANGE | `R00.0` | AHA/ACC 2009 Standardisation |
+| `WCT` | Tachycardia + QRS > 120 ms + HR > 120 bpm | RED | `I47.2` | Wide Complex Tachycardia — VT not excluded |
+| `ECTOPIC` | n RR intervals deviating > 20% from median | GREEN | `I49.40` | AHA/ACC 2009 |
+| `AVB1` | PR > 200 ms | ORANGE | `I44.0` | Bloc AV du 1er degré |
+| `SHORT_PR` | PR < 120 ms | ORANGE | `I45.6` | WPW / pre-excitation |
+| `PR_OK` | 120 ms ≤ PR ≤ 200 ms | GREEN | — | Normal AV conduction |
+| `IVCD` | QRS > 120 ms | ORANGE | `I45.4` | Bundle branch block / intraventricular conduction delay |
+| `ST_NA` | ST criteria invalid (IVCD or paced) | ORANGE | — | Sgarbossa criteria required |
+| `QT_LONG_SEVERE` | QTc > 500 ms | RED | `I45.81` | ESC 2022 — high risk of Torsades de Pointes |
+| `QT_LONG` | QTc > 450 ms (♂) / 460 ms (♀) | ORANGE | `R94.31` | Rautaharju et al., JACC 1992 |
+| `QT_SHORT` | QTc < 340 ms | ORANGE | `I45.89` | Short QT syndrome (suspected) |
+| `QT_OK` | QTc within normal limits | GREEN | — | Normal ventricular repolarisation |
+| `SINUS` | All findings GREEN | GREEN | — | Normal tracing |
 
 ---
 

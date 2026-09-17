@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -525,7 +525,7 @@
           <ul style="margin-left: 1.2rem; font-size: 0.88rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
             <li>Saisie de l'identité patient (IPP, Nom, DDN, Sexe)</li>
             <li>Upload du fichier ECG 12 dérivations</li>
-            <li>Suivi de l'analyse automatique (pipeline Celery)</li>
+            <li>Suivi de l'analyse automatique (pipeline synchrone <code>ecg_analysis</code>)</li>
             <li>Consultation des décisions du médecin :<br>
               ✅ Rapport validé & signé<br>
               🔄 Demande de réacquisition ECG (avec motif technique)<br>
@@ -608,7 +608,7 @@
            │   ├── Données Patient (Nom, Prénom, DDN, Sexe, IPP) ──► Ressource FHIR Patient
            │   └── Signal 12 dérivations (CSV/WFDB/EDF) + SHA-256  ──► ECGRecord (Liaison scellée)
            ▼
-  [3. Pipeline Asynchrone Celery (Signal & Règles)]
+[3. Pipeline Synchrone de Traitement du Signal (ecg_analysis)]
            │   ├── Filtrage Butterworth 0.5-40 Hz & Normalisation Z-score
            │   ├── Délinéation morphologique P-QRS-T (NeuroKit2 Lead II / V5)
            │   ├── Calculs d'intervalles (HR, PR, QRS, QT, QTc Bazett & Fridericia)
@@ -647,7 +647,7 @@
         <div class="card">
           <div class="card-title">Étape 3 : Calcul & Seuils Spécifiques au Sexe</div>
           <p>
-            Le worker Celery exécute le filtrage et la délinéation. Le moteur de règles exploite directement les données du patient (sexe biologique et date de naissance) pour ajuster les seuils cardiologiques (notamment le QTc selon <em>Rautaharju 1992</em>).
+            La bibliothèque <code class="inline">ecg_analysis</code> exécute le filtrage et la délinéation de façon synchrone dans la vue d'upload. Le moteur de règles exploite directement les données du patient (sexe biologique et date de naissance) pour ajuster les seuils QTc spécifiques au sexe.
           </p>
         </div>
 
@@ -716,7 +716,7 @@
             <tr>
               <td><strong>Traitement Asynchrone</strong></td>
               <td><span class="badge badge-warning">Celery 5.3</span> + <span class="badge badge-critical">Redis 7</span></td>
-              <td>Exécution asynchrone du pipeline de traitement du signal ECG.</td>
+              <td>Exécution synchrone du pipeline <code>ecg_analysis</code> lors de l'upload — résultat &lt; 1 000 ms.</td>
               <td>
                 La délinéation du signal (filtrage, détection des ondes P-QRS-T) prend entre 500 ms et 2 s. L'asynchronisme garantit que les endpoints HTTP ne sont jamais bloqués et restent hautement disponibles.
               </td>
@@ -756,59 +756,59 @@
     <section id="pipeline">
       <h2 class="section-title">4. Pipeline de Traitement du Signal ECG</h2>
       <p>
-        Le pipeline transforme les signaux bruts en mesures millimétriques via 5 étapes déterministes séquentielles :
-      </p>
-
+      <p>
+        Le pipeline est implémenté dans la bibliothèque <code class="inline">ecg_analysis</code> (<code class="inline">backend/ecg_analysis/</code>),
+        exécuté de façon <strong>synchrone et déterministe</strong> à chaque upload via <code class="inline">analyze_to_report()</code>, en moins de 1 000 ms.
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">Étape 1 : Ingestion Multi-Format & Hachage</div>
-          <p>Prise en charge native de 3 formats standardisés :</p>
+          <div class="card-title">Étape 1 : Ingestion Multi-Format (<code>readers.py → read_any()</code>)</div>
+          <p>Prise en charge native de 3 formats :</p>
           <ul style="margin-left: 1.2rem; font-size: 0.9rem;">
             <li><strong>WFDB (.mat + .hea) :</strong> Format standard PhysioNet (PTB-XL) via <code class="inline">wfdb.rdsamp()</code>.</li>
             <li><strong>CSV :</strong> 12 colonnes de tensions en mV avec en-têtes de dérivations.</li>
-            <li><strong>EDF/EDF+ :</strong> Fichiers cliniques via <code class="inline">mne.io.read_raw_edf()</code>.</li>
+            <li><strong>EDF/EDF+ :</strong> Fichiers cliniques via <code class="inline">pyedflib</code>.</li>
           </ul>
           <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
-            Empreinte <strong>SHA-256</strong> calculée immédiatement sur les chunks du fichier brut pour garantir l'immutabilité et la non-répudiation.
+            Amplitude normalisée en mV ; ordre remappé sur la séquence canonique AHA/ACC 12 dérivations.
           </p>
         </div>
 
         <div class="card">
-          <div class="card-title">Étape 2 : Pré-traitement & Filtrage</div>
-          <p>
-            Élimination des bruits physiologiques et des artefacts de mouvement :
-          </p>
+          <div class="card-title">Étape 2 : Pré-traitement (<code>pipeline.py → preprocess()</code>)</div>
+          <p>Chaîne de filtrage à phase nulle, sans distorsion ST :</p>
           <ul style="margin-left: 1.2rem; font-size: 0.9rem;">
-            <li><strong>Filtre passe-bande Butterworth 4ᵉ ordre (0.5 – 40 Hz) :</strong> Supprime la dérive de la ligne de base (&lt; 0.5 Hz) et les bruits myographiques haute fréquence (&gt; 40 Hz). Filtrage bidirectionnel à phase nulle (<code class="inline">scipy.signal.filtfilt</code>).</li>
-            <li><strong>Normalisation Z-score par dérivation :</strong> Stabilise la détection d'amplitude indépendamment des gains machine.</li>
-          </ul>
+            <li><strong>Rééchantillonnage polyphase</strong> à 500 Hz si <code class="inline">fs</code> source différent.</li>
+          <ul style="margin-left: 1.2rem; font-size: 0.9rem;">
+            <li><strong>Filtres notch IIR</strong> à 50 Hz et 100 Hz (Q = 30) — élimine les interférences secteur (réseau tunisien/européen).</li>
+            <li><strong>Correction de ligne de base en 2 étapes</strong> (filtre médian 200 ms puis 600 ms) — préserve le segment ST contrairement à un passe-haut classique.</li>
+            <li><strong>Passe-bas Butterworth 4ᵉ ordre à 150 Hz</strong>, appliqué zero-phase (<code class="inline">sosfiltfilt</code>).</li>
         </div>
 
         <div class="card">
-          <div class="card-title">Étape 3 : Délinéation P-QRS-T & Fallback</div>
-          <p>
-            Identification systématique des 5 repères morphologiques par battement :
-          </p>
-          <p style="font-size: 0.9rem;"><code>P_onset</code> → <code>Q_peak</code> → <code>R_peak</code> → <code>S_peak</code> → <code>T_offset</code></p>
+          <div class="card-title">Étape 3 : Contrôle Qualité &amp; Délinéation DWT (<code>assess_quality()</code>, <code>segment()</code>)</div>
+          <p>Vérification par dérivation avant toute interprétation :</p>
           <ul style="margin-left: 1.2rem; font-size: 0.85rem;">
-            <li><strong>Dérivation primaire :</strong> Dérivation II (Lead II).</li>
-            <li><strong>Fallback intelligent :</strong> Bascule sur V5 si le taux de délinéation de Lead II est &lt; 50%.</li>
-            <li><strong>Mode partiel (Pan-Tompkins) :</strong> Si les deux dérivations échouent, le pipeline extrait au minimum les pics R pour assurer le calcul de la fréquence cardiaque.</li>
+          </p>
+            <li><strong>Contrôle qualité :</strong> Ligne plate (pic-à-pic &lt; 0.05 mV), amplitude, dérive de baseline, bruit secteur, kurtosis. Rejet automatique (<code class="inline">REJET</code>) si signal non exploitable.</li>
+          <ul style="margin-left: 1.2rem; font-size: 0.85rem;">
+            <li><strong>Détection R-peaks :</strong> NeuroKit2 <code class="inline">ecg_peaks()</code> sur Dérivation II.</li>
+            <li><strong>Délinéation DWT :</strong> <code class="inline">ecg_delineate()</code> (ondelettes) sur dérivations ancre <strong>II, V1, V5</strong>.</li>
+            <li><strong>Offsets LUDB :</strong> calibrés sur 191 enregistrements — P_on +12.8 ms, P_off −18.3 ms, QRS_on −6.9 ms, QRS_off −4.4 ms, T_off −19.6 ms.</li>
           </ul>
         </div>
 
         <div class="card">
-          <div class="card-title">Étape 4 : Calcul des Intervalles Cliniques</div>
-          <p>Calcul battement par battement, puis restitution de la <strong>Médiane ± Écart Interquartile (IQR)</strong> :</p>
+          <div class="card-title">Étape 4 : Calcul des Intervalles Cliniques (<code>measure()</code>)</div>
+          <p>Médianes battement par battement, offsets de calibration appliqués :</p>
           <ul style="margin-left: 1.2rem; font-size: 0.85rem;">
             <li><strong>Fréquence Cardiaque (HR) :</strong> <code class="inline">60 000 / median_RR (ms)</code></li>
-            <li><strong>Intervalle PR :</strong> <code class="inline">P_onset → Q_peak (ms)</code></li>
-            <li><strong>Durée QRS :</strong> <code class="inline">Q_peak → S_peak (ms)</code></li>
-            <li><strong>Intervalle QT :</strong> <code class="inline">Q_peak → T_offset (ms)</code></li>
+            <li><strong>Intervalle PR :</strong> <code class="inline">P_onset → QRS_onset (ms)</code></li>
+            <li><strong>Durée QRS :</strong> <code class="inline">QRS_onset → QRS_offset (ms)</code></li>
+            <li><strong>Intervalle QT :</strong> <code class="inline">QRS_onset → T_offset (ms)</code></li>
             <li><strong>QTc Bazett (1920) :</strong> <code class="inline">QT / √(RR_sec)</code></li>
             <li><strong>QTc Fridericia (1920) :</strong> <code class="inline">QT / (RR_sec)^(1/3)</code></li>
-          </ul>
-        </div>
+            <li><strong>pNN50 &amp; RMSSD :</strong> variabilité de la fréquence cardiaque (HRV).</li>
+            <li><strong>Ectopies :</strong> cycles RR déviants &gt; 20 % de la médiane.</li>
       </div>
     </section>
 
@@ -816,7 +816,12 @@
     <section id="rules">
       <h2 class="section-title">5. Moteur de Règles Cliniques Déterministe</h2>
       <p>
-        Les 8 règles cliniques évaluent les intervalles mesurés. Chaque alerte produite contient obligatoirement sa valeur numérique mesurée, son seuil de déclenchement et sa source bibliographique médicale formelle.
+        La fonction <code class="inline">analyse()</code> de <code class="inline">ecg_analysis/pipeline.py</code>
+        applique des règles déterministes entièrement citées. Chaque finding produit expose obligatoirement :
+        <code class="inline">code</code>, <code class="inline">finding</code>, <code class="inline">severity</code>,
+        <code class="inline">measured</code>, <code class="inline">threshold</code>, <code class="inline">meaning</code>,
+        et un bloc <code class="inline">diagnosis</code> avec code ICD-10 / CIM-10 et libellé clinique.
+        Aucune règle n'utilise de poids de modèle, de score opaque ou de classifieur entraîné.
       </p>
 
       <div class="table-container">
@@ -826,66 +831,115 @@
               <th>Code Règle</th>
               <th>Condition Déclenchement</th>
               <th>Gravité</th>
-              <th>Signification Clinique</th>
+              <th>CIM-10</th>
               <th>Référence Médicale</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><code class="inline">BRADYCARDIA</code></td>
-              <td>Fréquence Cardiaque &lt; 60 bpm</td>
-              <td><span class="badge badge-warning">WARNING</span></td>
-              <td>Rythme anormalement lent</td>
+              <td><code class="inline">PACED</code></td>
+              <td>Drapeau de stimulation fourni par l'appareil</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>Z95.0</td>
+              <td>AHA/ACC 2022 — critères ST non applicables</td>
+            </tr>
+            <tr>
+              <td><code class="inline">IRREG</code></td>
+              <td>pNN50 &gt; 0.35 → fibrillation auriculaire non exclue</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>I48.91</td>
+              <td>Sensibilité 100 %, spécificité 79 % sur 200 enregistrements annotés</td>
+            </tr>
+            <tr>
+              <td><code class="inline">SINUS</code></td>
+              <td>pNN50 ≤ 0.35 → activité auriculaire organisée</td>
+              <td><span class="badge badge-success">GREEN</span></td>
+              <td>—</td>
               <td>AHA/ACC 2009 ECG Standardization</td>
             </tr>
             <tr>
-              <td><code class="inline">TACHYCARDIA</code></td>
-              <td>Fréquence Cardiaque &gt; 100 bpm</td>
-              <td><span class="badge badge-warning">WARNING</span></td>
-              <td>Rythme anormalement rapide</td>
+              <td><code class="inline">BRADY</code></td>
+              <td>Fréquence Cardiaque &lt; 60 bpm</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>R00.1</td>
               <td>AHA/ACC 2009 ECG Standardization</td>
+            </tr>
+            <tr>
+              <td><code class="inline">TACHY</code></td>
+              <td>Fréquence Cardiaque &gt; 90 bpm</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>R00.0</td>
+              <td>AHA/ACC 2009 ECG Standardization</td>
+            </tr>
+            <tr>
+              <td><code class="inline">WCT</code></td>
+              <td>Tachycardie + QRS &gt; 120 ms + FC &gt; 120 bpm</td>
+              <td><span class="badge badge-critical">RED</span></td>
+              <td>I47.2</td>
+              <td>Tachycardie à complexes larges — TV non exclue</td>
+            </tr>
+            <tr>
+              <td><code class="inline">ECTOPIC</code></td>
+              <td>n intervalles RR déviants &gt; 20 % de la médiane</td>
+              <td><span class="badge badge-success">GREEN</span></td>
+              <td>I49.40</td>
+              <td>AHA/ACC 2009</td>
+            </tr>
+            <tr>
+              <td><code class="inline">AVB1</code></td>
+              <td>Intervalle PR &gt; 200 ms</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>I44.0</td>
+              <td>Bloc auriculo-ventriculaire du 1er degré — AHA/ACC 2009</td>
             </tr>
             <tr>
               <td><code class="inline">SHORT_PR</code></td>
               <td>Intervalle PR &lt; 120 ms</td>
-              <td><span class="badge badge-warning">WARNING</span></td>
-              <td>Suspicion de pré-excitation ventriculaire (ex: WPW)</td>
-              <td>AHA/ACC 2009 Guidelines</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>I45.6</td>
+              <td>Pré-excitation ventriculaire (WPW suspect) — AHA/ACC 2009</td>
             </tr>
             <tr>
-              <td><code class="inline">LONG_PR</code></td>
-              <td>Intervalle PR &gt; 200 ms</td>
-              <td><span class="badge badge-warning">WARNING</span></td>
-              <td>Suspicion de bloc auriculo-ventriculaire du 1er degré</td>
-              <td>AHA/ACC 2009 Guidelines</td>
-            </tr>
-            <tr>
-              <td><code class="inline">WIDE_QRS</code></td>
+              <td><code class="inline">IVCD</code></td>
               <td>Durée QRS &gt; 120 ms</td>
-              <td><span class="badge badge-warning">WARNING</span></td>
-              <td>Bloc de branche ou conduction intra-ventriculaire altérée</td>
-              <td>AHA/ACC 2009 Guidelines</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>I45.4</td>
+              <td>Bloc de branche / retard de conduction intraventriculaire — AHA/ACC 2009</td>
             </tr>
             <tr>
-              <td><code class="inline">QTC_MODERATE</code></td>
-              <td>QTc ≥ 450 ms (Homme) / ≥ 460 ms (Femme)</td>
-              <td><span class="badge badge-warning">WARNING</span></td>
-              <td>Allongement modéré du QT (ajusté selon le sexe biologique)</td>
+              <td><code class="inline">ST_NA</code></td>
+              <td>QRS &gt; 120 ms ou rythme stimulé</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>—</td>
+              <td>Critères de Sgarbossa requis — seuils ST standard non applicables</td>
+            </tr>
+            <tr>
+              <td><code class="inline">QT_LONG_SEVERE</code></td>
+              <td>QTc &gt; 500 ms</td>
+              <td><span class="badge badge-critical">RED</span></td>
+              <td>I45.81</td>
+              <td>ESC 2022 — risque majeur de Torsades de Pointes</td>
+            </tr>
+            <tr>
+              <td><code class="inline">QT_LONG</code></td>
+              <td>QTc &gt; 450 ms (♂) / 460 ms (♀)</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>R94.31</td>
               <td>Rautaharju et al., JACC 1992</td>
             </tr>
             <tr>
-              <td><code class="inline">QTC_CRITICAL</code></td>
-              <td>QTc ≥ 500 ms</td>
-              <td><span class="badge badge-critical">CRITICAL</span></td>
-              <td>Risque majeur de Torsades de Pointes et mort subite</td>
-              <td>ESC 2022 Ventricular Arrhythmias Guidelines</td>
+              <td><code class="inline">QT_SHORT</code></td>
+              <td>QTc &lt; 340 ms</td>
+              <td><span class="badge badge-warning">ORANGE</span></td>
+              <td>I45.89</td>
+              <td>Syndrome du QT court (suspect)</td>
             </tr>
             <tr>
-              <td><code class="inline">NORMAL_SINUS</code></td>
-              <td>Toutes les métriques dans les plages physiologiques</td>
-              <td><span class="badge badge-success">INFO</span></td>
-              <td>Tracé normal sans anomalie apparente</td>
-              <td>Concordance complète AHA/ACC</td>
+              <td><code class="inline">QT_OK</code></td>
+              <td>QTc dans les limites physiologiques</td>
+              <td><span class="badge badge-success">GREEN</span></td>
+              <td>—</td>
+              <td>Repolarisation ventriculaire normale</td>
             </tr>
           </tbody>
         </table>
