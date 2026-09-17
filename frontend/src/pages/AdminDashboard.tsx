@@ -8,9 +8,6 @@ import {
   Clock,
   User,
   Activity,
-  ArrowRight,
-  AlertTriangle,
-  CheckCircle2,
 } from "lucide-react";
 import "./AdminDashboard.css";
 

@@ -7,7 +7,6 @@ from datetime import timedelta
 from ecg.models import ECGRecord
 from reports.models import Report
 from audit.models import AuditLog, AuditAction
-from accounts.permissions import IsAdmin
 
 
 class KPIDashboardView(APIView):

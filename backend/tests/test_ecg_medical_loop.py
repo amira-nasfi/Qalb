@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
-from ecg.models import EcgStudy, AuditEvent
+from ecg.models import EcgStudy
 from accounts.models import Role
 
 User = get_user_model()

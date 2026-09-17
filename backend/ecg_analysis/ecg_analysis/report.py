@@ -24,9 +24,10 @@ def build_report(res: dict, include_reference: str | None = None) -> str:
 
     q, tri, pat = res["quality"], res["triage"], res["patient"]
     m = res.get("measurements", {})
-    L = []; A = L.append
+    L = []
+    A = L.append
     A("=" * 74)
-    A(f"COMPTE RENDU ECG - ANALYSE AUTOMATISEE")
+    A("COMPTE RENDU ECG - ANALYSE AUTOMATISEE")
     A(f"Dossier : {pat.get('id') or 'non renseigne'}    "
       f"Age : {pat.get('age') or 'inconnu'}    Sexe : {pat.get('sex') or 'inconnu'}")
     A(f"Acquis  : {res['acquisition']['duration_s']} s, "
@@ -86,7 +87,7 @@ def build_report(res: dict, include_reference: str | None = None) -> str:
         diag_txt = f" -> {diag['label']} (CIM-10: {diag['icd10']})" if (diag and diag.get("icd10")) else ""
         A(f"   - [{f['severity']:6s}] {f['finding']}   ({f['measured']}){diag_txt}")
 
-    A(f"\n5. PRIORITE DE PRISE EN CHARGE")
+    A("\n5. PRIORITE DE PRISE EN CHARGE")
     A(f"   PRIORITE {tri['priority']} - {tri['label']}")
     A(f"   {tri['action']}")
     if tri["escalate"]:
@@ -98,8 +99,8 @@ def build_report(res: dict, include_reference: str | None = None) -> str:
     A(f"   {'TOTAL':<24} {res['timings']['total_ms']:>8.1f} ms")
 
     A("\n7. LIMITES DECLAREES")
-    for l in res["limits"]:
-        A(f"   - {l}")
+    for limit in res["limits"]:
+        A(f"   - {limit}")
 
     if include_reference:
         A(f"\n8. REFERENCE (annotation existante)\n   {include_reference}")

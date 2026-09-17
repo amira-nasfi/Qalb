@@ -1,5 +1,4 @@
 import os
-import numpy as np
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -13,7 +12,7 @@ from rest_framework.views import APIView
 from ecg_analysis import analyze_to_report, EcgReadError, read_any
 from patients.models import Patient
 from accounts.models import Role
-from .models import EcgStudy, AuditEvent, ECGRecord, ProcessingResult
+from .models import EcgStudy, AuditEvent
 from .permissions import CanAccessEcgStudy
 
 

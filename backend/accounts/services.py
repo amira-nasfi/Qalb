@@ -7,6 +7,7 @@ from .models import Role
 
 User = get_user_model()
 
+
 def generate_unique_8_digit_id() -> str:
     """Generates a strictly unique 8-digit random number string for the username."""
     while True:
@@ -14,10 +15,12 @@ def generate_unique_8_digit_id() -> str:
         if not User.objects.filter(username=new_id).exists():
             return new_id
 
+
 def generate_secure_password(length=12) -> str:
     """Generates a secure random password."""
     chars = string.ascii_letters + string.digits + "!@#$%^&*"
     return "".join(random.choices(chars, k=length))
+
 
 def create_practitioner_account(
     first_name: str,
@@ -40,7 +43,7 @@ def create_practitioner_account(
         username = generate_unique_8_digit_id()
 
     temp_password = generate_secure_password()
-    
+
     user = User.objects.create_user(
         username=username,
         email=email,
@@ -51,7 +54,7 @@ def create_practitioner_account(
         role=role,
         force_password_change=True
     )
-    
+
     # Send customized email according to role
     if role == Role.PHYSICIAN:
         subject = "Vos identifiants d'accès au Portail Médecin Qalb (Télé-expertise)"
@@ -72,7 +75,7 @@ def create_practitioner_account(
         f"Accès à la plateforme : http://localhost:5173/login\n\n"
         f"Cordialement,\nL'administration de la plateforme Qalb"
     )
-    
+
     send_mail(
         subject,
         message,
@@ -80,5 +83,5 @@ def create_practitioner_account(
         [email],
         fail_silently=False,
     )
-    
+
     return user

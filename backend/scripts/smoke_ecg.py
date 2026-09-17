@@ -47,8 +47,9 @@ def make_synthetic_csv(path: str, duration_s: int = 10, fs: int = 500) -> None:
     signals = {}
     for i, lead in enumerate(LEADS):
         hr = 70 + (i % 3) * 2       # 70, 72, 74 bpm cycling
-        raw = nk.ecg_simulate(duration=duration_s, sampling_rate=fs,
-                               heart_rate=hr, noise=0.02)
+        raw = nk.ecg_simulate(
+            duration=duration_s, sampling_rate=fs, heart_rate=hr, noise=0.02
+        )
         # crude polarity adjustment for limb leads
         if lead in ("aVR",):
             raw = -raw

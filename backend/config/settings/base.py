@@ -3,13 +3,14 @@ Django base settings for Qalb قلب ECG Platform.
 Shared across all environments.
 """
 
+import sys
+
 import environ
 from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-import sys
 # Ensure ecg_analysis package is discoverable
 ECG_ANALYSIS_PATH = str(BASE_DIR / "ecg_analysis")
 if ECG_ANALYSIS_PATH not in sys.path:

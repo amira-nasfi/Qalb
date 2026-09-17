@@ -19,4 +19,3 @@ urlpatterns = [
     # Direct alias for worklist
     path("worklist/", views.worklist, name="direct_worklist"),
 ]
-

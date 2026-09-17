@@ -9,7 +9,6 @@ Populates the database with realistic mock data for the practitioner dashboard:
 """
 
 import os
-import sys
 import django
 import uuid
 import hashlib
@@ -33,6 +32,7 @@ from accounts.models import User, Role  # noqa: E402
 
 STANDARD_LEADS = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"]
 
+
 def get_or_create_physician():
     physician = User.objects.filter(role=Role.PHYSICIAN).first()
     if not physician:
@@ -47,6 +47,7 @@ def get_or_create_physician():
         )
     return physician
 
+
 def generate_ecg_csv_content(hr: int = 75, duration: int = 10, fs: int = 500) -> str:
     lead_II = nk.ecg_simulate(duration=duration, sampling_rate=fs, heart_rate=hr)
     data = {}
@@ -57,6 +58,7 @@ def generate_ecg_csv_content(hr: int = 75, duration: int = 10, fs: int = 500) ->
     df = pd.DataFrame(data)
     df.insert(0, "fs", fs)
     return df.to_csv(index=False)
+
 
 def create_case(case_def, physician):
     # 1. Create Patient with full demographic data
@@ -131,6 +133,7 @@ def create_case(case_def, physician):
 
     print(f"Created Case #{report.id} - Status: {report.status} - Severity: {report.severity} - Patient: {patient.full_name} ({patient.patient_identifier})")
     return report
+
 
 def run():
     print("=== Cleaning previous reports and records ===")
@@ -388,4 +391,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-

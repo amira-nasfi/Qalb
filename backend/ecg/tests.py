@@ -1,14 +1,12 @@
 import os
-import io
 import tempfile
-import numpy as np
 from django.test import TestCase, override_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
-from ecg.models import EcgStudy, AuditEvent
+from ecg.models import EcgStudy
 from accounts.models import Role
 
 User = get_user_model()
@@ -120,8 +118,7 @@ class EcgStudyWorkflowTests(TestCase):
         trans_resp = self.client.post(f"/api/ecg/studies/{study.pk}/transmit/")
         self.assertEqual(trans_resp.status_code, 200)
         study.refresh_from_db()
-        self.assertEqual(study.state, EcgStudy.State.TRANSMITTED
-        )
+        self.assertEqual(study.state, EcgStudy.State.TRANSMITTED)
         self.assertIsNotNone(study.transmitted_at)
 
         # Physician opens

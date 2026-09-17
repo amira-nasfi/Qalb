@@ -23,6 +23,7 @@ def _reorder(sig: np.ndarray, names: list[str]) -> tuple[np.ndarray, list[str]]:
     """Map the file's lead order onto the canonical 12-lead order."""
     lut = {str(n).strip().lower().replace(" ", ""): i for i, n in enumerate(names)}
     # tolerate common spellings: "avr", "AVR", "aVR", "lead II", "ii"
+
     def find(lead: str):
         k = lead.lower()
         for cand in (k, "lead" + k, k.replace("v", "v")):
@@ -37,7 +38,8 @@ def _reorder(sig: np.ndarray, names: list[str]) -> tuple[np.ndarray, list[str]]:
     for lead in LEADS:
         i = find(lead)
         if i is not None:
-            rows.append(sig[i]); kept.append(lead)
+            rows.append(sig[i])
+            kept.append(lead)
     if not rows:
         raise EcgReadError(f"no recognisable 12-lead names in {names}")
     return np.asarray(rows, dtype=float), kept
@@ -57,8 +59,10 @@ def read_wfdb(path: str):
     for line in meta.get("comments", []):
         low = str(line).lower()
         if "<age>" in low:
-            try: md["age"] = float(line.split(":", 1)[1].strip())
-            except Exception: pass
+            try:
+                md["age"] = float(line.split(":", 1)[1].strip())
+            except Exception:
+                pass
         elif "<sex>" in low:
             md["sex"] = (line.split(":", 1)[1].strip().upper() or " ")[0]
         elif line.strip():

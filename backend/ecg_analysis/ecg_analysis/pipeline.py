@@ -97,7 +97,8 @@ def assess_quality(sig: np.ndarray, lead_names: list[str]) -> dict:
     for i, name in enumerate(lead_names):
         x = sig[i]
         reasons = []
-        n = int(FS); nw = len(x) // n
+        n = int(FS)
+        nw = len(x) // n
         if nw:
             ptp = np.ptp(x[:nw * n].reshape(nw, n), axis=1)
             if float(np.mean(ptp < 0.05)) > 0.20:
@@ -116,7 +117,7 @@ def assess_quality(sig: np.ndarray, lead_names: list[str]) -> dict:
         per_lead[name] = reasons
         if reasons:
             failed.append(name)
-    missing = [l for l in LEADS if l not in lead_names]
+    missing = [lead_name for lead_name in LEADS if lead_name not in lead_names]
     acceptable = len(failed) <= 2 and not missing
     return {"acceptable": acceptable, "failed_leads": failed,
             "missing_leads": missing, "per_lead": per_lead,
@@ -176,7 +177,8 @@ def _med(a):
 
 def measure(rpeaks: np.ndarray, seg: dict) -> dict:
     """Intervals, in milliseconds, with the calibration offsets applied."""
-    b = lambda k: BIAS_MS.get(k, 0.0) / 1000 * FS
+    def b(k):
+        return BIAS_MS.get(k, 0.0) / 1000 * FS
     m: dict = {}
     rr = np.diff(rpeaks) / FS
     m["n_beats"] = int(len(rpeaks))

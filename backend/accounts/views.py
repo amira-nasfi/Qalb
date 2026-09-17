@@ -184,7 +184,7 @@ class UserInviteView(APIView):
         serializer.is_valid(raise_exception=True)
         from .models import Role
         from .services import create_practitioner_account
-        
+
         user = create_practitioner_account(
             first_name=serializer.validated_data["first_name"],
             last_name=serializer.validated_data["last_name"],
@@ -203,7 +203,7 @@ class UserInviteView(APIView):
             request=request,
             extra={"role": user.role, "username": user.username},
         )
-        
+
         return Response(UserListSerializer(user).data, status=status.HTTP_201_CREATED)
 
 

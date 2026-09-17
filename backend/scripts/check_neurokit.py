@@ -35,7 +35,6 @@ def main() -> int:
     # ── 2. Import and synthesise a 10-second signal ─────────────────────────
     try:
         import neurokit2 as nk
-        import numpy as np
     except ImportError as exc:
         print(f"FAIL: import error — {exc}")
         return 1
@@ -45,14 +44,16 @@ def main() -> int:
     clean = nk.ecg_clean(sig, sampling_rate=500)
 
     # ── 3. Detect R-peaks ───────────────────────────────────────────────────
-    _, rp_info = nk.ecg_peaks(clean, sampling_rate=500,
-                               method="pantompkins1985")
+    _, rp_info = nk.ecg_peaks(
+        clean, sampling_rate=500, method="pantompkins1985"
+    )
     r_peaks = rp_info["ECG_R_Peaks"]
     print(f"R-peaks detected: {len(r_peaks)}")
 
     # ── 4. Delineate PQRST (DWT method — same as ecg_analysis/pipeline.py) ──
-    _, waves = nk.ecg_delineate(clean, r_peaks, sampling_rate=500,
-                                 method="dwt")
+    _, waves = nk.ecg_delineate(
+        clean, r_peaks, sampling_rate=500, method="dwt"
+    )
     found_keys = set(waves.keys())
     print(f"delineate keys: {sorted(found_keys)}")
 
