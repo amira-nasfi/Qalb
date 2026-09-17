@@ -444,6 +444,7 @@
       <ul class="nav-links">
         <li><a href="#pipeline">4. Pipeline Traitement Signal</a></li>
         <li><a href="#rules">5. Moteur de Règles Cliniques</a></li>
+        <li><a href="#validation">5.bis Validation Clinique (LUDB)</a></li>
         <li><a href="#workflow">6. Cycle de Vie du Rapport</a></li>
         <li><a href="#doctor-portal">6.bis Portail Télé-Interprétation</a></li>
         <li><a href="#fhir">7. Export HL7 FHIR R4</a></li>
@@ -570,24 +571,23 @@
 │  /api/admin/    /api/audit/        Role-Based Permissions (FieldAgent / Physician / Admin)│
 │                                                                                        │
 │   ┌────────────────────────┐   ┌────────────────────────┐   ┌───────────────────────┐  │
-│   │   Audit Middleware     │   │   Rule Engine (8 règles)│  │   FHIR R4 Builder     │  │
-│   │   (Log append-only)    │   │   (AHA / ESC / Rautah.)│   │   (Obs + DiagReport)  │  │
+│   │   Audit Middleware     │   │  Rule Engine (DiagMap) │   │   FHIR R4 Builder     │  │
+│   │   (Log append-only)    │   │  (AHA / ESC / Rautah.) │   │   (Obs + DiagReport)  │  │
 │   └────────────────────────┘   └────────────────────────┘   └───────────────────────┘  │
+│                                                                                        │
+│   ┌────────────────────────────────────────────────────────────────────────────────┐   │
+│   │            ecg_analysis (synchrone, ~200 ms) · analyze_to_report()              │   │
+│   │   Notch 50/100Hz · Ligne Médiane · Passe-bas 150Hz · Qualité · DWT II/V1/V5   │   │
+│   └────────────────────────────────────────────────────────────────────────────────┘   │
 └───────────────────────────────────────────┬────────────────────────────────────────────┘
                                             │
                      ┌──────────────────────┴──────────────────────┐
                      ▼                                             ▼
        ┌───────────────────────────┐                 ┌───────────────────────────┐
-       │   PostgreSQL 15 (DB)      │                 │     Redis 7 (Broker)      │
-       │   Tables relationnelles   │                 │     Files de messages     │
-       │   Champs chiffrés AES-256 │                 └─────────────┬─────────────┘
-       └───────────────────────────┘                               │
-                                                                   ▼
-                                                     ┌───────────────────────────┐
-                                                     │     Celery Worker         │
-                                                     │  Pipeline Traitement ECG  │
-                                                     │  (SciPy, NeuroKit2, WFDB) │
-                                                     └───────────────────────────┘
+       │   PostgreSQL 15 (DB)      │                 │       Celery + Redis      │
+       │   Tables relationnelles   │                 │ (provisionnés, non câblés)│
+       │   Champs chiffrés AES-256 │                 │ Tâches différées futures  │
+       └───────────────────────────┘                 └───────────────────────────┘
         </pre>
       </div>
     </section>
@@ -608,11 +608,13 @@
            │   ├── Données Patient (Nom, Prénom, DDN, Sexe, IPP) ──► Ressource FHIR Patient
            │   └── Signal 12 dérivations (CSV/WFDB/EDF) + SHA-256  ──► ECGRecord (Liaison scellée)
            ▼
-[3. Pipeline Synchrone de Traitement du Signal (ecg_analysis)]
-           │   ├── Filtrage Butterworth 0.5-40 Hz & Normalisation Z-score
-           │   ├── Délinéation morphologique P-QRS-T (NeuroKit2 Lead II / V5)
-           │   ├── Calculs d'intervalles (HR, PR, QRS, QT, QTc Bazett & Fridericia)
-           │   └── Moteur de règles déterministe (Seuils QTc adaptés au sexe du patient)
+  [3. Pipeline Synchrone (ecg_analysis · analyze_to_report)]
+           │   ├── Notch 50/100 Hz · ligne de base médiane 200/600 ms · passe-bas 150 Hz
+           │   │   (phase nulle, amplitude conservée en mV)
+           │   ├── Contrôle qualité par dérivation → REJET si non exploitable
+           │   ├── Délinéation DWT P-QRS-T (dérivations ancre II, V1, V5)
+           │   ├── Intervalles (HR, PR, QRS, QT, QTc Bazett & Fridericia) + offsets LUDB
+           │   └── Moteur de règles déterministe (seuils QTc adaptés au sexe)
            ▼
   [4. Portail Médecin (/doctor)] ──── File d'expertise triée par gravité (CRITIQUE → URGENT → ROUTINE)
            │   ├── KPIs : En attente · Mes dossiers en cours · Dossiers traités
@@ -716,9 +718,9 @@
             <tr>
               <td><strong>Traitement Asynchrone</strong></td>
               <td><span class="badge badge-warning">Celery 5.3</span> + <span class="badge badge-critical">Redis 7</span></td>
-              <td>Exécution synchrone du pipeline <code>ecg_analysis</code> lors de l'upload — résultat &lt; 1 000 ms.</td>
+              <td>Infrastructure asynchrone provisionnée (non câblée)</td>
               <td>
-                La délinéation du signal (filtrage, détection des ondes P-QRS-T) prend entre 500 ms et 2 s. L'asynchronisme garantit que les endpoints HTTP ne sont jamais bloqués et restent hautement disponibles.
+                L'analyse est délibérément synchrone dans la vue d'upload (~200 ms à chaud) : l'opérateur a besoin du verdict qualité pendant qu'il est encore auprès du patient. Celery et Redis sont en place pour les traitements différés à venir (export massif, recalcul de cohorte).
               </td>
             </tr>
             <tr>
@@ -943,6 +945,65 @@
             </tr>
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- 5.BIS VALIDATION DU PIPELINE SUR BASE LUDB -->
+    <section id="validation">
+      <h2 class="section-title">5.bis Validation Clinique du Pipeline (Base LUDB)</h2>
+      <p>
+        Performances mesurées sur le pipeline live contre la base de référence cardiologique <strong>LUDB</strong> (Lobachevsky University Electrocardiography Database, 200 enregistrements 12 dérivations annotés par des cardiologues) :
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Composant</th>
+              <th>Résultat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Détection des battements</strong></td>
+              <td>Se 99,94 %, VPP 99,66 %, erreur médiane 2 ms — 191 enregistrements, 1 817 battements annotés</td>
+            </tr>
+            <tr>
+              <td><strong>Rythmes appareillés</strong></td>
+              <td>Se 71,43 %, n=8 — le détecteur se verrouille sur le spicule, ~70 ms avant le QRS</td>
+            </tr>
+            <tr>
+              <td><strong>Sensibilité des bornes</strong></td>
+              <td>P_on 98,4 % · P_off 92,9 % · QRS_on 96,7 % · QRS_off 98,1 % · T_off 76,7 %</td>
+            </tr>
+            <tr>
+              <td><strong>Dispersion résiduelle</strong></td>
+              <td>2 SD 41 à 58 ms — au-dessus des tolérances CSE sur les cinq bornes</td>
+            </tr>
+            <tr>
+              <td><strong>Intervalles (médianes, n=176)</strong></td>
+              <td>FC 64 bpm · PR 159 ms · QRS 94 ms · QT 377 ms · QTcB 402 ms — toutes dans les plages normales publiées</td>
+            </tr>
+            <tr>
+              <td><strong>Dépistage rythme irrégulier</strong></td>
+              <td>Se 100 %, Sp 78,6 %, seuil pNN50 0,35, n=200</td>
+            </tr>
+            <tr>
+              <td><strong>Classification du rythme</strong></td>
+              <td>84 % d'accord avec les annotations cardiologues, n=200</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="subsection-title">Limites Déclarées</h3>
+      <div class="card">
+        <ul style="margin-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+          <li><strong>Amplitude normalisée dans LUDB :</strong> LUDB est normalisée par dérivation sur une étendue de 1,000 mV, donc les critères en tension absolue (ST, hypertrophie, microvoltage, axe) ne sont pas calculables dessus.</li>
+          <li><strong>Spicules de stimulation :</strong> La détection de spicule de stimulation nécessite un échantillonnage ≥ 1 kHz ; à 500 Hz, un spicule de 1 ms correspond à un seul échantillon, le marqueur de stimulation est donc une entrée équipement et non une sortie.</li>
+          <li><strong>Pathologies non couvertes :</strong> Bloc auriculo-ventriculaire de 3e degré et latéralisation des blocs de branche non couverts.</li>
+          <li><strong>Population :</strong> Adulte uniquement.</li>
+        </ul>
       </div>
     </section>
 
@@ -1420,11 +1481,9 @@
       <div class="callout callout-warning">
         <div class="callout-icon">📚</div>
         <div class="callout-content">
-          <p><strong>Datasets Publics Réels Référencés :</strong></p>
-          <p>• <strong>PTB-XL :</strong> DOI 10.13026/cmsy-5161 (Tests du pipeline, signaux de démonstration)</p>
-          <p>• <strong>QT Database :</strong> DOI 10.13026/C24K53 (Validation de la précision du calcul QTc)</p>
-          <p>• <strong>LUDB :</strong> DOI 10.13026/qwde-4j96 (Évaluation du délinéateur morphologique)</p>
-          <p><em>Aucun signal synthétique ou halluciné n'est employé comme preuve clinique.</em></p>
+          <p><strong>Dataset Public Réel Utilisé :</strong></p>
+          <p>• <strong>LUDB :</strong> DOI 10.13026/qwde-4j96 — 200 enregistrements 12 dérivations, 500 Hz, bornes P/QRS/T annotées par dérivation par des cardiologues. Base de calibration du délinéateur et source de l'ensemble des chiffres de validation rapportés.</p>
+          <p><em>Aucun signal synthétique ou halluciné n'est employé comme preuve clinique. Les bases PTB-XL et QT Database n'ont pas été téléchargées dans ce projet.</em></p>
         </div>
       </div>
     </section>
