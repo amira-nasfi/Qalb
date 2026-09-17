@@ -15,10 +15,18 @@ build/
 /backend/staticfiles/
 /backend/.env
 
-# Environment
+# Environment & Secrets
 .env
-.env.local
-.env.*.local
+.env.*
+*.env
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.cert
+*.pfx
+credentials.json
 
 # Node / Frontend
 node_modules/
